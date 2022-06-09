@@ -14,15 +14,23 @@ build_greta_dist_init <- function(dist_name,
   param_list <- glue::glue_collapse(x = dist_arg_list,
                                     sep = ", ")
   
-  param_quoted_list <- glue::glue_collapse(x = glue::glue("'{dist_arg_list}'"),
-                                           sep = ", ")
-  
-  greta_array_coerce <- glue::glue(
-    "{dist_arg_list} <- as.greta_array({dist_arg_list})"
+  param_quoted_list <- glue::glue_collapse(
+    x = glue::glue("'{dist_arg_list}'"),
+    sep = ", "
     )
   
-  greta_self_assign <- glue::glue(
-    "self${dist_arg_list} <- {dist_arg_list}"
+  greta_array_coerce <- glue::glue_collapse(
+    x = glue::glue(
+      "{dist_arg_list} <- as.greta_array({dist_arg_list})"
+    ),
+    sep = "\n"
+  )
+  
+  greta_self_assign <- glue::glue_collapse(
+    x = glue::glue(
+      "self${dist_arg_list} <- {dist_arg_list}"
+      ),
+    sep = "\n"
   )
   
   greta_array_coerce_assign <- glue::glue_collapse(
@@ -31,8 +39,15 @@ build_greta_dist_init <- function(dist_name,
     sep = "\n"
   )
   
+  greta_self_add <- glue::glue_collapse(
+    x = glue::glue(
+      "self$add_parameter({dist_arg_list}, 'dist_arg_list')"
+    ),
+    sep = "\n"
+  )
+  
   glue::glue(
-    "initialize = function([param_list], dim) {
+    "initialize = function([param_list], \ndim) {
       
       [greta_array_coerce_assign]
       
@@ -40,7 +55,7 @@ build_greta_dist_init <- function(dist_name,
       dim <- greta:::check_dims([param_list], 
                                 target_dim = dim)
       super$initialize('[dist_name]', dim, discrete = SET_OPTION)
-      self$add_parameter([param_quoted_list])
+      [greta_self_add]
     
     }
     
