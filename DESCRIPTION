@@ -24,9 +24,10 @@ License: Apache License 2.0
 URL: https://github.com/greta-dev/greta.distributions
 BugReports: https://github.com/greta-dev/greta.distributions/issues
 Depends: 
-    greta (>= 0.4.2)
+    greta (>= 0.4.0),
     R (>= 3.1.0)
 Imports: 
+    glue,
     tensorflow (>= 1.14.0)
 Suggests: 
     covr,
@@ -43,4 +44,3 @@ RoxygenNote: 7.2.0
 SystemRequirements: Python (>= 2.7.0) with header files and shared
     library; TensorFlow (v1.14; https://www.tensorflow.org/); TensorFlow
     Probability (v0.7.0; https://www.tensorflow.org/probability/)
-
