@@ -1,8 +1,5 @@
-# this R file is just here to produce a package-level helpfile for people to
-# look at when they get started
-
-#' @title What the Package Does (One Line, Title Case)
-#' @name greta.template
+#' @title Extends Distributions Available in the `greta` package
+#' @name greta.distributions
 #' 
 #' @description describe your package here, you can re-use the text from DESCRIPTION
 #' 
