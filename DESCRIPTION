@@ -28,6 +28,7 @@ Depends:
     R (>= 3.1.0)
 Imports: 
     glue,
+    styler,
     tensorflow (>= 1.14.0)
 Suggests: 
     covr,
