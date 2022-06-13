@@ -31,6 +31,8 @@ Imports:
     tensorflow (>= 1.14.0)
 Suggests: 
     covr,
+    knitr,
+    rmarkdown,
     spelling,
     testthat (>= 3.1.0)
 VignetteBuilder: 
