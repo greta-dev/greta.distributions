@@ -41,6 +41,10 @@
 #' @param dim a scalar giving the number of rows in the resulting greta array
 #'
 #' @export
+#' @examples 
+#' \dontrun{
+#' 
+#' }
 conditional_bernoulli <- function(p, psi, dim = 1) {
   distrib("conditional_bernoulli", p, psi, dim)
 }
@@ -51,25 +55,39 @@ conditional_bernoulli_distribution <- R6::R6Class(
   inherit = distribution_node,
   public = list(
     initialize = function(p, psi, dim) {
+      
+      # check that p and psi  are between 0 and
+      p_val <- p
+      psi_val <- psi
 
       # coerce to greta arrays
       p <- as.greta_array(p)
       psi <- as.greta_array(psi)
-
+      
       # check dimensions of p
       if (ncol(p) < 2 | length(dim(p)) != 2) {
-        stop("p must be a 2D greta array with at least two columns, ",
-          "but has dimensions ",
-          paste(dim(p), collapse = " x "),
+        msg <- cli::format_error(
+          c(
+            "{.var p} must be a 2D array with at least two columns",
+            "but {.var p} has dimensions {paste(dim(p), collapse = 'x')}"
+          )
+        ) 
+        stop(
+          msg,
           call. = FALSE
         )
       }
 
       # check dimensions of psi
       if (ncol(psi) != 1 | length(dim(psi)) != 2) {
-        stop("psi must be a 2D greta array with one column, ",
-          "but has dimensions ",
-          paste(dim(psi), collapse = " x "),
+        msg <- cli::format_error(
+          c(
+            "{.var psi} must be a 2D greta array with one column",
+            "but {.var psi} has dimensions {paste(dim(psi), collapse = 'x')}"
+          )
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
@@ -79,8 +97,18 @@ conditional_bernoulli_distribution <- R6::R6Class(
       dim_psi <- nrow(psi)
 
       if (dim_p != dim_psi) {
-        stop("p and psi have different dimensions, ",
-          dim_p, " vs ", dim_psi,
+        msg <- cli::format_error(
+          c(
+            "{.var p} and {.var psi} must have the same number of rows",
+            "But we see {.var p} and {.var psi} have:",
+            "{.var p}: {dim_p} {?row/rows}",
+            "{.var psi}: {dim_psi} {?row/rows}",
+            "Perhaps you need to coerce {.var p} or {.var psi} to an \\
+            appropriate matrix?"
+          )
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
@@ -89,11 +117,21 @@ conditional_bernoulli_distribution <- R6::R6Class(
       dim_old <- dim
       dim <- as.integer(dim)
       if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
-        stop("dim must be a scalar positive integer, but was: ",
-          capture.output(dput(dim_old)),
+        msg <- cli::format_error(
+          c(
+            "{.var dim} must be a scalar positive integer, but was:",
+            "{capture.output(dput(dim_old))}"
+          )
+        )
+        stop(
+          msg,
           call. = FALSE
         )
       }
+      
+      # check p and psi are between 0 and 1
+      check_valid_probability(p_val, var_name = "p")
+      check_valid_probability(psi_val, var_name = "psi")
 
       # coerce the parameter arguments to nodes and add as children and
       # parameters
