@@ -43,7 +43,12 @@
 #' @export
 #' @examples 
 #' \dontrun{
-#' 
+#' cb <- conditional_bernoulli(
+#'   p = matrix(c(0.1,0.9), ncol = 2), 
+#'   psi = c(0.9),
+#'   dim = 1
+#'   )
+#' cb
 #' }
 conditional_bernoulli <- function(p, psi, dim = 1) {
   distrib("conditional_bernoulli", p, psi, dim)
@@ -82,7 +87,7 @@ conditional_bernoulli_distribution <- R6::R6Class(
       if (ncol(psi) != 1 | length(dim(psi)) != 2) {
         msg <- cli::format_error(
           c(
-            "{.var psi} must be a 2D greta array with one column",
+            "{.var psi} must be a 2D array with one column",
             "but {.var psi} has dimensions {paste(dim(psi), collapse = 'x')}"
           )
         )
@@ -120,7 +125,7 @@ conditional_bernoulli_distribution <- R6::R6Class(
         msg <- cli::format_error(
           c(
             "{.var dim} must be a scalar positive integer, but was:",
-            "{capture.output(dput(dim_old))}"
+            "{dim_old}"
           )
         )
         stop(
