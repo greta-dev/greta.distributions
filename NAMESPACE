@@ -3,6 +3,8 @@
 export(zero_inflated_negative_binomial)
 export(zero_inflated_poisson)
 importFrom(R6,R6Class)
+export(conditional_bernoulli)
+import(R6)
 importFrom(greta,.internals)
 importFrom(tensorflow,tf)
 importFrom(utils,globalVariables)
