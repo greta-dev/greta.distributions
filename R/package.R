@@ -7,6 +7,7 @@
 #' 
 #' @importFrom tensorflow tf
 #' @importFrom greta .internals
+#' @import R6
 #' 
 #' @examples
 #' 
