@@ -50,23 +50,7 @@ discrete_lognormal_distribution <- R6Class(
           call. = FALSE
         )
       }
-      
-      # check dim is a positive scalar integer
-      dim_old <- dim
-      dim <- as.integer(dim)
-      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
-        msg <- cli::format_error(
-          c(
-            "{.var dim} must be a scalar positive integer, but was:",
-            "{dim_old}"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
-      
+
       # handle gradient issue between sdlog and 0s
       breaks <- pmax(breaks, .Machine$double.eps)
       self$breaks <- breaks
