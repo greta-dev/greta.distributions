@@ -1,30 +1,29 @@
-#' @name discrete_lognormal
-#' @title Discrete lognormal distribution
+#' @name discrete_normal
+#' @title Discrete normal distribution
 #'
-#' @description a discretised lognormal distribution (i.e. sampled by applying 
-#'   the round operation to samples from a lognormal). Due to the numerical 
+#' @description a discretised normal distribution (i.e. sampled by applying 
+#'   the round operation to samples from a normal). Due to the numerical 
 #'   instability of integrating across the distribution, a vector of breaks 
 #'   must be defined and the observations will be treated as censored 
 #'   within those breaks
 #'
-#' @param meanlog unconstrained parameters giving the mean of the distribution 
-#'   on the log scale
-#' @param sdlog unconstrained parameters giving the standard deviation of the 
-#'   distribution on the log scale
+#' @param mean unconstrained parameters giving the mean of the distribution
+#' @param sd unconstrained parameters giving the standard deviation of the 
+#'   distribution
 #' @param breaks a vector of breaks; observations will be treated as censored 
 #'   within those breaks
 #' @param dim a scalar giving the number of rows in the resulting greta array
 #'
 #' @importFrom R6 R6Class
 #' @export
- 
-discrete_lognormal <- function(meanlog, sdlog, breaks, dim = NULL) {
-  distrib("discrete_lognormal", meanlog, sdlog, breaks, dim)
+
+discrete_normal <- function(mean, sd, breaks, dim = NULL) {
+  distrib("discrete_normal", mean, sd, breaks, dim)
 }
 
-# define the discrete lognormal distribution
-discrete_lognormal_distribution <- R6Class(
-  classname = "discrete_lognormal_distribution",
+# define the discrete normal distribution
+discrete_normal_distribution <- R6Class(
+  classname = "discrete_normal_distribution",
   inherit = distribution_node,
   public = list(
     
@@ -32,10 +31,10 @@ discrete_lognormal_distribution <- R6Class(
     lower_bounds = NA,
     upper_bounds = NA,
     
-    initialize = function(meanlog, sdlog, breaks, dim) {
+    initialize = function(mean, sd, breaks, dim) {
       
-      meanlog <- as.greta_array(meanlog)
-      sdlog   <- as.greta_array(sdlog)
+      mean <- as.greta_array(mean)
+      sd   <- as.greta_array(sd)
       
       # check length of breaks
       if (length(breaks) <= 1) {
@@ -50,7 +49,7 @@ discrete_lognormal_distribution <- R6Class(
           call. = FALSE
         )
       }
-
+      
       # handle gradient issue between sdlog and 0s
       breaks <- pmax(breaks, .Machine$double.eps)
       self$breaks <- breaks
@@ -58,17 +57,17 @@ discrete_lognormal_distribution <- R6Class(
       self$upper_bounds <- breaks[-1]
       
       # add the nodes as parents and parameters
-      dim <- check_dims(meanlog, sdlog, target_dim = dim)
-      super$initialize("discrete_lognormal", dim, discrete = TRUE)
-      self$add_parameter(meanlog, "meanlog")
-      self$add_parameter(sdlog, "sdlog")
+      dim <- check_dims(mean, sd, target_dim = dim)
+      super$initialize("discrete_normal", dim, discrete = TRUE)
+      self$add_parameter(mean, "mean")
+      self$add_parameter(sd, "sd")
       
     },
     
     tf_distrib = function(parameters, dag) {
       
-      meanlog <- parameters$meanlog
-      sdlog <- parameters$sdlog
+      mean <- parameters$mean
+      sd <- parameters$sd
       
       tf_breaks <- fl(self$breaks)
       tf_lower_bounds <- fl(self$lower_bounds)
@@ -77,9 +76,9 @@ discrete_lognormal_distribution <- R6Class(
       log_prob <- function(x) {
         
         # build distribution object
-        d <- tfp$distributions$LogNormal(
-          loc = meanlog,
-          scale = sdlog
+        d <- tfp$distributions$Normal(
+          loc = mean,
+          scale = sd
         )
         
         # for those lumped into groups,
@@ -100,9 +99,9 @@ discrete_lognormal_distribution <- R6Class(
       
       sample <- function(seed) {
         
-        d <- tfp$distributions$LogNormal(
-          loc = meanlog,
-          scale = sdlog
+        d <- tfp$distributions$Normal(
+          loc = mean,
+          scale = sd
         )
         continuous <- d$sample(seed = seed)
         # tf$floor(continuous)
