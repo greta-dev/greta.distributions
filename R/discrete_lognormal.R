@@ -105,7 +105,8 @@ discrete_lognormal_distribution <- R6Class(
           scale = sdlog
         )
         continuous <- d$sample(seed = seed)
-        tf$floor(continuous)
+        # tf$floor(continuous)
+        tf$round(continuous)
         
       }
       
