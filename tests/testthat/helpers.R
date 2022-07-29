@@ -836,6 +836,23 @@ check_samples <- function(x,
   testthat::expect_gte(stat$p.value, 0.01)
 }
 
+# zero inflated poisson using distributional
+
+zero_inflated_pois <- function(lambda,
+                               prob){
+    dist_inflated(
+      dist = dist_poisson(lambda = lambda),
+      prob = prob,
+      x = 0
+    )
+  
+}
+
+sample_zero_inflated_pois <- function(n, lambda, prob){
+  generate(x = zero_inflated_pois(lambda = lambda, prob = prob),
+           n)
+}
+
 # zero-inflated distribution from rethinking package
 dzipois <- function(x , theta , lambda , log=FALSE ) {
   ll <- ifelse( x==0 , theta + (1-theta)*exp(-lambda) , (1-theta)*dpois(x,lambda,FALSE) )
