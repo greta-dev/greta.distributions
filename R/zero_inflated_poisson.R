@@ -3,13 +3,13 @@
 #'
 #' @description A zero inflated poisson distribution.
 #'
-#' @param theta proportion of zeros
 #' @param lambda rate parameter
+#' @param theta proportion of zeros
 #' @param dim a scalar giving the number of rows in the resulting greta array
 #' @importFrom R6 R6Class
 #' @export
-zero_inflated_poisson <- function (theta, lambda, dim = NULL) {
-  distrib('zero_inflated_poisson', theta, lambda, dim)
+zero_inflated_poisson <- function (lambda, theta, dim = NULL) {
+  distrib('zero_inflated_poisson', lambda, theta, dim)
 }
 
 #' @importFrom R6 R6Class
@@ -17,19 +17,19 @@ zero_inflated_poisson_distribution <- R6::R6Class(
   classname = "zero_inflated_poisson_distribution",
   inherit = distribution_node,
   public = list(
-    initialize = function(theta, lambda, dim) {
-      theta <- as.greta_array(theta)
+    initialize = function(lambda, theta, dim) {
       lambda <- as.greta_array(lambda)
+      theta <- as.greta_array(theta)
       # add the nodes as children and parameters
-      dim <- check_dims(theta, lambda, target_dim = dim)
+      dim <- check_dims(lambda, theta, target_dim = dim)
       super$initialize("zero_inflated_poisson", dim, discrete = TRUE)
-      self$add_parameter(theta, "theta")
       self$add_parameter(lambda, "lambda")
+      self$add_parameter(theta, "theta")
     },
     
     tf_distrib = function(parameters, dag) {
-      theta <- parameters$theta
       lambda <- parameters$lambda
+      theta <- parameters$theta
       log_prob <- function(x) {
         tf$math$log(
           theta * 
