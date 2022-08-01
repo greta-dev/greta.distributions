@@ -4,8 +4,8 @@
 tf_safe_cdf <- function(x, distribution) {
   
   # prepare to handle values outside the supported range
-  too_low <- tf$less(x, greta:::fl(0))
-  too_high <- tf$equal(x, greta:::fl(Inf))
+  too_low <- tf$less(x, fl(0))
+  too_high <- tf$equal(x, fl(Inf))
   supported <- !too_low & !too_high
   ones <- tf$ones_like(x)
   zeros <- tf$zeros_like(x)
