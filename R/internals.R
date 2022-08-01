@@ -24,3 +24,6 @@ fl <- .internals$utils$misc$fl
 tf_as_float <- .internals$tensors$tf_as_float
 tf_rowsums <- .internals$tensors$tf_rowsums
 op <- .internals$nodes$constructors$op
+
+get_node <- .internals$greta_arrays$get_node
+dag_class <- .internals$inference$dag_class
