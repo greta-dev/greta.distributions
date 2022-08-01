@@ -18,9 +18,10 @@ test_that("zero inflated poisson distribution has correct density", {
 test_that("zero inflated negative binomial distribution has correct density", {
   skip_if_not(check_tf_version())
 
-  compare_distribution(zero_inflated_negative_binomial,
-    extraDistr::dzinb,
-    parameters = list(theta = 2, size = 10, prob = 0.1, pi = 0.2),
+  compare_distribution(
+    greta_fun = zero_inflated_negative_binomial,
+    r_fun = extraDistr::dzinb,
+    parameters = list(10, 0.1, 0.2),
     x = extraDistr::rzinb(
       n = 100, size = 10, prob = 0.1, pi = 0.2
     )
