@@ -901,37 +901,37 @@ check_samples <- function(x,
 
 # zero inflated poisson using distributional
 
-dist_zero_inflated_pois <- function(lambda, prob_zeros) {
+dist_zero_inflated_pois <- function(lambda, pi) {
   distributional::dist_inflated(
     dist = distributional::dist_poisson(lambda = lambda),
-    prob = prob_zeros,
+    prob = pi,
     x = 0
   )
 }
 
 dist_zero_inflated_negative_binomial <-
-  function(size, prob, prob_zeros) {
+  function(size, prob, pi) {
     distributional::dist_inflated(
       dist = distributional::dist_negative_binomial(
         size = size,
         prob = prob
       ),
-      prob = prob_zeros,
+      prob = pi,
       x = 0
     )
   }
 
-sample_zero_inflated_pois <- function(n, lambda, prob) {
+sample_zero_inflated_pois <- function(n, lambda, pi) {
   distributional::generate(
-    x = dist_zero_inflated_pois(lambda = lambda, prob = prob),
+    x = dist_zero_inflated_pois(lambda = lambda, pi = pi),
     n
   )[[1]]
 }
 
 sample_zero_inflated_neg_binomial <-
-  function(n, size, lambda, prob_zeros) {
+  function(n, size, lambda, pi) {
     distributional::generate(
-      x = dist_zero_inflated_pois(lambda = lambda, prob = prob_zeros),
+      x = dist_zero_inflated_pois(lambda = lambda, pi = pi),
       n
     )[[1]]
   }

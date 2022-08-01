@@ -4,12 +4,12 @@
 #' @description A zero inflated poisson distribution.
 #'
 #' @param lambda rate parameter
-#' @param theta proportion of zeros
+#' @param pi proportion of zeros
 #' @param dim a scalar giving the number of rows in the resulting greta array
 #' @importFrom R6 R6Class
 #' @export
-zero_inflated_poisson <- function (lambda, theta, dim = NULL) {
-  distrib('zero_inflated_poisson', lambda, theta, dim)
+zero_inflated_poisson <- function (lambda, pi, dim = NULL) {
+  distrib('zero_inflated_poisson', lambda, pi, dim)
 }
 
 #' @importFrom R6 R6Class
@@ -17,31 +17,31 @@ zero_inflated_poisson_distribution <- R6::R6Class(
   classname = "zero_inflated_poisson_distribution",
   inherit = distribution_node,
   public = list(
-    initialize = function(lambda, theta, dim) {
+    initialize = function(lambda, pi, dim) {
       lambda <- as.greta_array(lambda)
-      theta <- as.greta_array(theta)
+      pi <- as.greta_array(pi)
       # add the nodes as children and parameters
-      dim <- check_dims(lambda, theta, target_dim = dim)
+      dim <- check_dims(lambda, pi, target_dim = dim)
       super$initialize("zero_inflated_poisson", dim, discrete = TRUE)
       self$add_parameter(lambda, "lambda")
-      self$add_parameter(theta, "theta")
+      self$add_parameter(pi, "pi")
     },
     
     tf_distrib = function(parameters, dag) {
       lambda <- parameters$lambda
-      theta <- parameters$theta
+      pi <- parameters$pi
       log_prob <- function(x) {
         tf$math$log(
-          theta * 
+          pi * 
             tf$nn$relu(fl(1) - x) + 
-            (fl(1) - theta) * 
+            (fl(1) - pi) * 
             tf$pow(lambda, x) * 
             tf$exp(-lambda) / tf$exp(tf$math$lgamma(x + fl(1)))
         )
       }
       
       sample <- function(seed) {
-        binom <- tfp$distributions$Binomial(total_count = 1, probs = theta)
+        binom <- tfp$distributions$Binomial(total_count = 1, probs = pi)
         pois <- tfp$distributions$Poisson(rate = lambda)
         
         zi <- binom$sample(seed = seed)
