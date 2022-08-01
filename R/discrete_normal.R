@@ -91,6 +91,7 @@ discrete_normal_distribution <- R6Class(
         tf_upper_vec <- tf$gather(tf_upper_bounds, tf_idx_int)
         
         # compute the density over the observed groups
+        # note-to-self: this looks like https://mc-stan.org/docs/2_29/stan-users-guide/bayesian-measurement-error-model.html#rounding
         low <- tf_safe_cdf(tf_lower_vec, d)
         up <- tf_safe_cdf(tf_upper_vec, d)
         log_density <- log(up - low)
