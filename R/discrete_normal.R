@@ -30,6 +30,8 @@ discrete_normal_distribution <- R6Class(
     breaks = NA,
     lower_bounds = NA,
     upper_bounds = NA,
+    lower_bound = NA,
+    upper_bound = NA,
     
     initialize = function(mean, sd, breaks, dim) {
       
@@ -50,11 +52,13 @@ discrete_normal_distribution <- R6Class(
         )
       }
       
-      # handle gradient issue between sdlog and 0s
-      breaks <- pmax(breaks, .Machine$double.eps)
+      # add breaks, vector of lower and upper bounds, and the lower and upper
+      # bound of supported values
       self$breaks <- breaks
       self$lower_bounds <- breaks[-length(breaks)]
       self$upper_bounds <- breaks[-1]
+      self$lower_bound <- min(breaks)
+      self$upper_bound <- max(breaks)
       
       # add the nodes as parents and parameters
       dim <- check_dims(mean, sd, target_dim = dim)
@@ -72,6 +76,8 @@ discrete_normal_distribution <- R6Class(
       tf_breaks <- fl(self$breaks)
       tf_lower_bounds <- fl(self$lower_bounds)
       tf_upper_bounds <- fl(self$upper_bounds)
+      tf_lower_bound <- fl(self$lower_bound)
+      tf_upper_bound <- fl(self$upper_bound)
       
       log_prob <- function(x) {
         
@@ -84,16 +90,16 @@ discrete_normal_distribution <- R6Class(
         # for those lumped into groups,
         # compute the bounds of the observed groups
         # and get tensors for the bounds in the format expected by TFP
-        x_safe <- tf$math$maximum(x, fl(.Machine$double.eps))
-        tf_idx <- tfp$stats$find_bins(x_safe, tf_breaks)
+        # x_safe <- tf$math$maximum(x, fl(.Machine$double.eps))
+        tf_idx <- tfp$stats$find_bins(x, tf_breaks)
         tf_idx_int <- greta:::tf_as_integer(tf_idx)
         tf_lower_vec <- tf$gather(tf_lower_bounds, tf_idx_int)
         tf_upper_vec <- tf$gather(tf_upper_bounds, tf_idx_int)
         
         # compute the density over the observed groups
         # note-to-self: this looks like https://mc-stan.org/docs/2_29/stan-users-guide/bayesian-measurement-error-model.html#rounding
-        low <- tf_safe_cdf(tf_lower_vec, d)
-        up <- tf_safe_cdf(tf_upper_vec, d)
+        low <- tf_safe_cdf(tf_lower_vec, d, tf_lower_bound, tf_upper_bound)
+        up <- tf_safe_cdf(tf_upper_vec, d, tf_lower_bound, tf_upper_bound)
         log_density <- log(up - low)
         
       }

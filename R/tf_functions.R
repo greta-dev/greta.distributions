@@ -1,11 +1,11 @@
 # tensorflow functions
 
 # CDF of the provided distribution, handling 0s and Infs
-tf_safe_cdf <- function(x, distribution) {
+tf_safe_cdf <- function(x, distribution, lower_bound, upper_bound) {
   
   # prepare to handle values outside the supported range
-  too_low <- tf$less(x, fl(0))
-  too_high <- tf$equal(x, fl(Inf))
+  too_low <- tf$less(x, lower_bound)
+  too_high <- tf$greater(x, upper_bound)
   supported <- !too_low & !too_high
   ones <- tf$ones_like(x)
   zeros <- tf$zeros_like(x)
