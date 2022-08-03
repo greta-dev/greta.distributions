@@ -91,7 +91,7 @@ discrete_normal_distribution <- R6Class(
         # compute the bounds of the observed groups
         # and get tensors for the bounds in the format expected by TFP
         tf_idx <- tfp$stats$find_bins(x, tf_breaks)
-        tf_idx_int <- greta:::tf_as_integer(tf_idx)
+        tf_idx_int <- tf_as_integer(tf_idx)
         tf_lower_vec <- tf$gather(tf_lower_bounds, tf_idx_int)
         tf_upper_vec <- tf$gather(tf_upper_bounds, tf_idx_int)
         
@@ -124,7 +124,7 @@ discrete_normal_distribution <- R6Class(
         # ditto from what we did to breaks above
         tf_edges <- fl(edges)
         tf_edges_idx <- tfp$stats$find_bins(continuous, tf_edges)
-        tf_edges_idx_int <- greta:::tf_as_integer(tf_edges_idx)
+        tf_edges_idx_int <- tf_as_integer(tf_edges_idx)
         tf$gather(tf_breaks, tf_edges_idx_int)
 
       }

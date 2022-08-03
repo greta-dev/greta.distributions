@@ -87,7 +87,7 @@ discrete_lognormal_distribution <- R6Class(
         # and get tensors for the bounds in the format expected by TFP
         x_safe <- tf$math$maximum(x, fl(.Machine$double.eps))
         tf_idx <- tfp$stats$find_bins(x_safe, tf_breaks)
-        tf_idx_int <- greta:::tf_as_integer(tf_idx)
+        tf_idx_int <- tf_as_integer(tf_idx)
         tf_lower_vec <- tf$gather(tf_lower_bounds, tf_idx_int)
         tf_upper_vec <- tf$gather(tf_upper_bounds, tf_idx_int)
         

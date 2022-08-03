@@ -18,3 +18,8 @@ tf_safe_cdf <- function(x, distribution, lower_bound, upper_bound) {
   cdf_clean * mask + add
   
 }
+
+# cast to integer
+tf_as_integer <- function(x) {
+  tf$cast(x, tf$int32)
+}
