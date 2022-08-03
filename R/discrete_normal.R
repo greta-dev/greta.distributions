@@ -90,7 +90,6 @@ discrete_normal_distribution <- R6Class(
         # for those lumped into groups,
         # compute the bounds of the observed groups
         # and get tensors for the bounds in the format expected by TFP
-        # x_safe <- tf$math$maximum(x, fl(.Machine$double.eps))
         tf_idx <- tfp$stats$find_bins(x, tf_breaks)
         tf_idx_int <- greta:::tf_as_integer(tf_idx)
         tf_lower_vec <- tf$gather(tf_lower_bounds, tf_idx_int)
@@ -111,9 +110,23 @@ discrete_normal_distribution <- R6Class(
           scale = sd
         )
         continuous <- d$sample(seed = seed)
-        # tf$floor(continuous)
-        tf$round(continuous)
+        # tf$round(continuous)
         
+        # gather samples at the breaks to convert them to rounded values
+        # while avoiding the use of round or floor, which assumes that 
+        # the breaks are all the integers
+        # first, create the lower and upper bounds that will bin a continuous
+        # variable into breaks
+        # using midpoint between breaks for now (from diff)
+        # generate edges using midpoint, -Inf, and Inf
+        breaks_diff <- diff(self$breaks)
+        edges <- c(-Inf, self$lower_bounds + breaks_diff, Inf)
+        # ditto from what we did to breaks above
+        tf_edges <- fl(edges)
+        tf_edges_idx <- tfp$stats$find_bins(continuous, tf_edges)
+        tf_edges_idx_int <- greta:::tf_as_integer(tf_edges_idx)
+        tf$gather(tf_breaks, tf_edges_idx_int)
+
       }
       
       list(log_prob = log_prob, sample = sample)
