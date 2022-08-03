@@ -38,18 +38,7 @@ discrete_lognormal_distribution <- R6Class(
       sdlog   <- as.greta_array(sdlog)
       
       # check length of breaks
-      if (length(breaks) <= 1) {
-        msg <- cli::format_error(
-          c(
-            "{.var breaks} must be a vector with at least two break points",
-            "but {.var breaks} has length {length(breaks)}"
-          )
-        ) 
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
+      check_break_length(breaks)
 
       # handle gradient issue between sdlog and 0s
       breaks <- pmax(breaks, .Machine$double.eps)
