@@ -70,6 +70,7 @@ conditional_bernoulli_distribution <- R6::R6Class(
       psi <- as.greta_array(psi)
       
       # check dimensions of p
+      check_if_2d_array(p)
       if (ncol(p) < 2 | length(dim(p)) != 2) {
         msg <- cli::format_error(
           c(
