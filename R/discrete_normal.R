@@ -12,13 +12,16 @@
 #'   distribution
 #' @param breaks a vector of breaks; observations will be treated as censored 
 #'   within those breaks
+#' @param edges a vector of edges; length needs to be length(breaks)+1;
+#'   observations between two consecutive edges will be discretised to the 
+#'   break value between the corresponding edges
 #' @param dim a scalar giving the number of rows in the resulting greta array
 #'
 #' @importFrom R6 R6Class
 #' @export
 
-discrete_normal <- function(mean, sd, breaks, dim = NULL) {
-  distrib("discrete_normal", mean, sd, breaks, dim)
+discrete_normal <- function(mean, sd, breaks, edges, dim = NULL) {
+  distrib("discrete_normal", mean, sd, breaks, edges, dim)
 }
 
 # define the discrete normal distribution
@@ -28,12 +31,13 @@ discrete_normal_distribution <- R6Class(
   public = list(
     
     breaks = NA,
+    edges = NA,
     lower_bounds = NA,
     upper_bounds = NA,
     lower_bound = NA,
     upper_bound = NA,
     
-    initialize = function(mean, sd, breaks, dim) {
+    initialize = function(mean, sd, breaks, edges, dim) {
       
       mean <- as.greta_array(mean)
       sd   <- as.greta_array(sd)
@@ -43,11 +47,32 @@ discrete_normal_distribution <- R6Class(
       
       # add breaks, vector of lower and upper bounds, and the lower and upper
       # bound of supported values
-      self$breaks <- breaks
-      self$lower_bounds <- breaks[-length(breaks)]
-      self$upper_bounds <- breaks[-1]
-      self$lower_bound <- min(breaks)
-      self$upper_bound <- max(breaks)
+      # self$breaks <- breaks
+      # self$lower_bounds <- breaks[-length(breaks)]
+      # self$upper_bounds <- breaks[-1]
+      # self$lower_bound <- min(breaks)
+      # self$upper_bound <- max(breaks)
+      
+      # EXPERIMENTAL:
+      # convert breaks to edges, which
+      # will be used to gather samples at the breaks and convert them to 
+      # rounded values 
+      # while avoiding the use of round or floor, which assumes that 
+      # the breaks are all the integers
+      # perhaps more crucially, we use edges, not breaks, to integrate the CDFs
+      # because we say that the likelihood of observing a break value is the sum
+      # of probability from the lower to upper edges surrounding a break
+      # first, create the lower and upper bounds that will bin a continuous
+      # variable into breaks
+      # using midpoint between breaks for now (from diff)
+      # generate edges using midpoint, -Inf, and Inf
+      # breaks_diff <- diff(breaks)
+      # edges <- c(-Inf, breaks[-length(breaks)] + breaks_diff/2, Inf)
+      self$edges <- edges
+      self$lower_bounds <- edges[-length(edges)]
+      self$upper_bounds <- edges[-1]
+      self$lower_bound <- min(edges)
+      self$upper_bound <- max(edges)
       
       # add the nodes as parents and parameters
       dim <- check_dims(mean, sd, target_dim = dim)
@@ -63,6 +88,7 @@ discrete_normal_distribution <- R6Class(
       sd <- parameters$sd
       
       tf_breaks <- fl(self$breaks)
+      tf_edges <- fl(self$edges)
       tf_lower_bounds <- fl(self$lower_bounds)
       tf_upper_bounds <- fl(self$upper_bounds)
       tf_lower_bound <- fl(self$lower_bound)
@@ -79,7 +105,7 @@ discrete_normal_distribution <- R6Class(
         # for those lumped into groups,
         # compute the bounds of the observed groups
         # and get tensors for the bounds in the format expected by TFP
-        tf_idx <- tfp$stats$find_bins(x, tf_breaks)
+        tf_idx <- tfp$stats$find_bins(x, tf_edges)
         tf_idx_int <- tf_as_integer(tf_idx)
         tf_lower_vec <- tf$gather(tf_lower_bounds, tf_idx_int)
         tf_upper_vec <- tf$gather(tf_upper_bounds, tf_idx_int)
@@ -99,23 +125,13 @@ discrete_normal_distribution <- R6Class(
           scale = sd
         )
         continuous <- d$sample(seed = seed)
-        # tf$round(continuous)
         
         # gather samples at the breaks to convert them to rounded values
-        # while avoiding the use of round or floor, which assumes that 
-        # the breaks are all the integers
-        # first, create the lower and upper bounds that will bin a continuous
-        # variable into breaks
-        # using midpoint between breaks for now (from diff)
-        # generate edges using midpoint, -Inf, and Inf
-        breaks_diff <- diff(self$breaks)
-        edges <- c(-Inf, self$lower_bounds + breaks_diff, Inf)
         # ditto from what we did to breaks above
-        tf_edges <- fl(edges)
         tf_edges_idx <- tfp$stats$find_bins(continuous, tf_edges)
         tf_edges_idx_int <- tf_as_integer(tf_edges_idx)
         tf$gather(tf_breaks, tf_edges_idx_int)
-
+        
       }
       
       list(log_prob = log_prob, sample = sample)
