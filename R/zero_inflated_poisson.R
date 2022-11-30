@@ -29,14 +29,14 @@ zero_inflated_poisson_distribution <- R6::R6Class(
     
     tf_distrib = function(parameters, dag) {
       lambda <- parameters$lambda
-      pi <- parameters$pi
+      pi_var <- parameters$pi
       log_prob <- function(x) {
         tf$math$log(
-          pi * 
-            tf$nn$relu(fl(1) - x) + 
-            (fl(1) - pi) * 
-            tf$pow(lambda, x) * 
-            tf$exp(-lambda) / tf$exp(tf$math$lgamma(x + fl(1)))
+          (pi_var * (fl(1) - tf$math$sign(tf$math$abs(x))) + 
+             tf$math$exp(
+               tf$math$log1p(-pi_var) - lambda + 
+                 x * tf$math$log(lambda) - tf$math$lgamma(x + fl(1)))
+          )
         )
       }
       
