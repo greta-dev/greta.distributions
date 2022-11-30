@@ -32,21 +32,28 @@ zero_inflated_negative_binomial_distribution <- R6::R6Class(
       q <- fl(1) - parameters$prob
       log_prob <- function(x) {
         tf$math$log(
-          pi_var * tf$nn$relu(fl(1) - x) + (fl(1) - pi_var) * tf$pow(p, size) * tf$pow(q, x) * tf$exp(tf$math$lgamma(x + size)) / tf$exp(tf$math$lgamma(size)) / tf$exp(tf$math$lgamma(x + fl(1)))
+          (pi_var * (fl(1) - tf$math$sign(tf$math$abs(x))) + 
+             tf$math$exp(
+               tf$math$log1p(-pi_var) + 
+                 tf_lchoose(x+size-fl(1), x) + 
+                 size * tf$math$log(p) + 
+                 x * tf$math$log1p(-p)
+             )
+          )
         )
       }
-
+      
       sample <- function(seed) {
         binom <- tfp$distributions$Binomial(total_count = 1, probs = pi_var)
         negbin <-
           tfp$distributions$NegativeBinomial(total_count = size, probs = q) # change of proba / parametrisation in 'stats'
-
+        
         zi <- binom$sample(seed = seed)
         lbd <- negbin$sample(seed = seed)
-
+        
         (fl(1) - zi) * lbd
       }
-
+      
       list(
         log_prob = log_prob,
         sample = sample,
