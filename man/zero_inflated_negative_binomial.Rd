@@ -4,14 +4,14 @@
 \alias{zero_inflated_negative_binomial}
 \title{Zero Inflated Negative Binomial}
 \usage{
-zero_inflated_negative_binomial(theta, size, prob, dim = NULL)
+zero_inflated_negative_binomial(size, prob, pi, dim = NULL)
 }
 \arguments{
-\item{theta}{proportion of zeros}
-
 \item{size}{positive integer parameter}
 
 \item{prob}{probability parameter (\verb{0 < prob < 1}),}
+
+\item{pi}{proportion of zeros}
 
 \item{dim}{a scalar giving the number of rows in the resulting greta array}
 }

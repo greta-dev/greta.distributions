@@ -4,12 +4,12 @@
 \alias{zero_inflated_poisson}
 \title{Zero Inflated Poisson distribution}
 \usage{
-zero_inflated_poisson(theta, lambda, dim = NULL)
+zero_inflated_poisson(lambda, pi, dim = NULL)
 }
 \arguments{
-\item{theta}{proportion of zeros}
-
 \item{lambda}{rate parameter}
+
+\item{pi}{proportion of zeros}
 
 \item{dim}{a scalar giving the number of rows in the resulting greta array}
 }
