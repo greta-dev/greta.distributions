@@ -4,10 +4,11 @@
 # greta.distributions
 
 <!-- badges: start -->
-<!-- once you've signed into travis and set it to wath your new repository, you can edit the following badges to point to your repo -->
 
 [![Codecov test
 coverage](https://codecov.io/gh/greta-dev/greta.distributions/branch/main/graph/badge.svg)](https://codecov.io/gh/greta-dev/greta.distributions?branch=main)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/greta.distributions)](https://CRAN.R-project.org/package=greta.distributions)
 [![R-CMD-check](https://github.com/njtierney/greta.distributions/workflows/R-CMD-check/badge.svg)](https://github.com/njtierney/greta.distributions/actions)
 <!-- badges: end -->
 
