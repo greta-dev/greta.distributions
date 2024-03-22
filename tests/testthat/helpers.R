@@ -1,5 +1,6 @@
 # test functions
-
+check_tf_version <- .internals$checks$check_tf_version
+create_progress_bar <- .internals$inference$progress_bar$create_progress_bar
 # set the seed and flush the graph before running tests
 if (check_tf_version()) {
   tensorflow::tf$compat$v1$reset_default_graph()

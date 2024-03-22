@@ -2,15 +2,24 @@
 #' @name greta.distributions
 #' 
 #' @description describe your package here, you can re-use the text from DESCRIPTION
-#' 
-#' @docType package
-#' 
+#' @keywords internal
+"_PACKAGE"
+
+## usethis namespace: start
 #' @importFrom tensorflow tf
 #' @importFrom greta .internals
 #' @importFrom R6 R6Class
-#' 
-#' @examples
-#' 
-#' # add a simple example here to introduce the package!
-#' 
+#' @importFrom utils globalVariables
+## usethis namespace: end
 NULL
+
+globalVariables(
+  c(
+    "as_2d_array",
+    "as_data",
+    "calculate",
+    "initials",
+    "prep_initials",
+    "variable"
+  )
+)
