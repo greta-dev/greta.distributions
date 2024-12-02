@@ -56,13 +56,15 @@ get_density <- function(distrib, data) {
   as.vector(grab(tensor, dag))
 }
 
-compare_distribution <- function(greta_fun,
-                                 r_fun,
-                                 parameters,
-                                 x,
-                                 dim = NULL,
-                                 multivariate = FALSE,
-                                 tolerance = 1e-4) {
+compare_distribution <- function(
+    greta_fun,
+    r_fun,
+    parameters,
+    x,
+    dim = NULL,
+    multivariate = FALSE,
+    tolerance = 1e-4
+) {
   # calculate the absolute difference in the log density of some data between
   # greta and a r benchmark.
   # 'greta_fun' is the greta distribution constructor function (e.g. normal())
@@ -73,8 +75,11 @@ compare_distribution <- function(greta_fun,
 
   # define greta distribution, with fixed values
   greta_log_density <- greta_density(
-    greta_fun, parameters, x,
-    dim, multivariate
+    greta_fun,
+    parameters,
+    x,
+    dim,
+    multivariate
   )
   # get R version
   r_log_density <- log(do.call(r_fun, c(list(x), parameters)))
@@ -85,54 +90,51 @@ compare_distribution <- function(greta_fun,
 
 # evaluate the log density of x, given 'parameters' and a distribution
 # constructor function 'fun'
-greta_density <- function(fun,
-                          parameters,
-                          x,
-                          dim = NULL,
-                          multivariate = FALSE) {
-  if (is.null(dim)) {
-    dim <- NROW(x)
-  }
-
+greta_density <- function(
+    fun,
+    parameters,
+    x,
+    dim = NULL,
+    multivariate = FALSE
+) {
+  
+  dim <- dim %||% NROW(x)
+  
   # add the output dimension to the arguments list
   dim_list <- list(dim = dim)
-
+  
   # if it's a multivariate distribution name it n_realisations
   if (multivariate) {
     names(dim_list) <- "n_realisations"
   }
-
+  
   # don't add it for wishart & lkj, which don't mave multiple realisations
   is_wishart <- identical(names(parameters), c("df", "Sigma"))
   is_lkj <- identical(names(parameters), c("eta", "dimension"))
   if (is_wishart | is_lkj) {
     dim_list <- list()
   }
-
+  
   parameters <- c(parameters, dim_list)
-
+  
   # evaluate greta distribution
   dist <- do.call(fun, parameters)
   distrib_node <- get_node(dist)$distribution
-
+  
   # set density
   x_ <- as.greta_array(x)
   distrib_node$remove_target()
   distrib_node$add_target(get_node(x_))
-
+  
   # create dag
   dag <- dag_class$new(list(x_))
-  dag$define_tf()
-  dag$set_tf_data_list("batch_size", 1L)
-  dag$build_feed_dict()
-
+  
+  dag$tf_environment$batch_size <- 1L
+  distrib_node$define_tf(dag)
+  
   # get the log density as a vector
-  dag$on_graph(result <-
-    dag$evaluate_density(distrib_node, get_node(x_)))
-  assign("test_density", result, dag$tf_environment)
-
-  density <- dag$tf_sess_run(test_density)
-  as.vector(density)
+  result <- dag$evaluate_density(distrib_node, get_node(x_))
+  as.vector(result)
 }
 
 # execute a call via greta, swapping the objects named in 'swap' to greta
