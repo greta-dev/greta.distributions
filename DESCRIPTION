@@ -24,19 +24,28 @@ License: Apache License 2.0
 URL: https://github.com/greta-dev/greta.distributions
 BugReports: https://github.com/greta-dev/greta.distributions/issues
 Depends: 
-    greta (>= 0.4.2),
-    R (>= 3.1.0)
+    greta (>= 0.5.0),
+    R (>= 4.1.0)
 Imports: 
     cli,
     glue,
+    progress,
     R6,
-    tensorflow (>= 1.14.0)
+    tensorflow (== 2.16.0),
+    rlang
 Suggests: 
+    coda,
     covr,
+    cramer,
+    distributional,
+    extraDistr,
     knitr,
+    likelihoodExplore,
+    mvtnorm,
     rmarkdown,
     spelling,
-    testthat (>= 3.1.0)
+    testthat (>= 3.1.0),
+    truncdist
 VignetteBuilder: 
     knitr
 Config/testthat/edition: 3
@@ -44,7 +53,7 @@ Encoding: UTF-8
 Language: en-GB
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.0
+RoxygenNote: 7.3.2
 SystemRequirements: Python (>= 2.7.0) with header files and shared
     library; TensorFlow (v1.14; https://www.tensorflow.org/); TensorFlow
     Probability (v0.7.0; https://www.tensorflow.org/probability/)
