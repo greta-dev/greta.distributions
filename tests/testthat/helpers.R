@@ -868,38 +868,85 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
 # compare the samples with iid samples returned by iid_function (which takes the
 # number of arguments as its sole argument), producing a labelled qqplot, and
 # running a KS test for differences between the two samples
-check_samples <- function(x,
-                          iid_function,
-                          sampler = hmc(),
-                          n_effective = 3000,
-                          title = NULL,
-                          one_by_one = FALSE) {
+# sample values of greta array 'x' (which must follow a distribution), and
+# compare the samples with iid samples returned by iid_function (which takes the
+# number of arguments as its sole argument), producing a labelled qqplot, and
+# running a KS test for differences between the two samples
+check_samples <- function(
+    x,
+    iid_function,
+    sampler = hmc(),
+    n_effective = 3000,
+    title = NULL,
+    one_by_one = FALSE,
+    time_limit = 300
+) {
   m <- model(x, precision = "single")
   draws <- get_enough_draws(
-    m,
+    model = m,
     sampler = sampler,
     n_effective = n_effective,
-    verbose = FALSE,
-    one_by_one = one_by_one
+    verbose = TRUE,
+    one_by_one = one_by_one,
+    time_limit = time_limit
   )
-
+  
   neff <- coda::effectiveSize(draws)
   iid_samples <- iid_function(neff)
   mcmc_samples <- as.matrix(draws)
+  
+  thin_amount <- find_thinning(draws)
+  
+  mcmc_samples <- do_thinning(mcmc_samples, thin_amount)
+  iid_samples <- do_thinning(iid_samples, thin_amount)
+  
+  list(
+    mcmc_samples = mcmc_samples,
+    iid_samples = iid_samples,
+    distrib = get_distribution_name(x),
+    sampler_name = class(sampler)[1]
+  )
+}
 
-  # plot
-  if (is.null(title)) {
-    distrib <- get_node(x)$distribution$distribution_name
-    sampler_name <- class(sampler)[1]
-    title <- paste(distrib, "with", sampler_name)
-  }
 
-  stats::qqplot(mcmc_samples, iid_samples, main = title)
+qqplot_checked_samples <- function(checked_samples, title){
+  
+  distrib <- checked_samples$distrib
+  sampler_name <- checked_samples$sampler_name
+  title <- paste(distrib, "with", sampler_name)
+  
+  mcmc_samples <- checked_samples$mcmc_samples
+  iid_samples <- checked_samples$iid_samples
+  
+  stats::qqplot(
+    x = mcmc_samples,
+    y = iid_samples,
+    main = title
+  )
+  
   graphics::abline(0, 1)
+}
 
+
+## helpers for running Kolmogorov-Smirnov test for MCMC samples vs IID samples
+ks_test_mcmc_vs_iid <- function(checked_samples){
   # do a formal hypothesis test
-  suppressWarnings(stat <- ks.test(mcmc_samples, iid_samples))
-  testthat::expect_gte(stat$p.value, 0.01)
+  suppressWarnings(stat <- ks.test(checked_samples$mcmc_samples,
+                                   checked_samples$iid_samples))
+  stat
+}
+
+## helpers for looping through optimisers
+run_opt <- function(
+    m,
+    optmr,
+    max_iterations = 200
+) {
+  opt(
+    m,
+    optimiser = optmr(),
+    max_iterations = max_iterations
+  )
 }
 
 # zero inflated poisson using distributional
