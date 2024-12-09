@@ -949,6 +949,8 @@ run_opt <- function(
   )
 }
 
+# discrete lognormal
+
 # zero inflated poisson using distributional
 
 dist_zero_inflated_pois <- function(lambda, pi) {

@@ -32,7 +32,8 @@ Imports:
     progress,
     R6,
     tensorflow (== 2.16.0),
-    rlang
+    rlang,
+    reticulate (>= 1.40.0)
 Suggests: 
     coda,
     covr,
