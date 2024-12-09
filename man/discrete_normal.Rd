@@ -4,7 +4,7 @@
 \alias{discrete_normal}
 \title{Discrete normal distribution}
 \usage{
-discrete_normal(mean, sd, breaks, dim = NULL)
+discrete_normal(mean, sd, breaks, edges, dim = NULL)
 }
 \arguments{
 \item{mean}{unconstrained parameters giving the mean of the distribution}
@@ -14,6 +14,10 @@ distribution}
 
 \item{breaks}{a vector of breaks; observations will be treated as censored
 within those breaks}
+
+\item{edges}{a vector of edges; length needs to be length(breaks)+1;
+observations between two consecutive edges will be discretised to the
+break value between the corresponding edges}
 
 \item{dim}{a scalar giving the number of rows in the resulting greta array}
 }

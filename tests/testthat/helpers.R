@@ -1,5 +1,6 @@
 # test functions
-
+check_tf_version <- .internals$checks$check_tf_version
+create_progress_bar <- .internals$inference$progress_bar$create_progress_bar
 # set the seed and flush the graph before running tests
 if (check_tf_version()) {
   tensorflow::tf$compat$v1$reset_default_graph()
@@ -16,13 +17,13 @@ grab <- function(x, dag = NULL) {
   if (inherits(x, "node")) {
     x <- as.greta_array(x)
   }
-  
+
   if (inherits(x, "greta_array")) {
     node <- get_node(x)
     dag <- dag_class$new(list(x))
     dag$define_tf()
   }
-  
+
   dag$set_tf_data_list("batch_size", 1L)
   dag$build_feed_dict()
   out <- dag$tf_sess_run(dag$tf_name(node), as_text = TRUE)
@@ -44,20 +45,26 @@ set_distribution <- function(dist, data) {
 get_density <- function(distrib, data) {
   x <- as_data(data)
   distribution(x) <- distrib
-  
+
   # create dag and define the density
   dag <- dag_class$new(list(x))
   get_node(x)$distribution$define_tf(dag)
-  
+
   # get the log density as a vector
   tensor_name <- dag$tf_name(get_node(distrib)$distribution)
   tensor <- get(tensor_name, envir = dag$tf_environment)
   as.vector(grab(tensor, dag))
 }
 
-compare_distribution <- function(greta_fun, r_fun, parameters, x,
-                                 dim = NULL, multivariate = FALSE,
-                                 tolerance = 1e-4) {
+compare_distribution <- function(
+    greta_fun,
+    r_fun,
+    parameters,
+    x,
+    dim = NULL,
+    multivariate = FALSE,
+    tolerance = 1e-4
+) {
   # calculate the absolute difference in the log density of some data between
   # greta and a r benchmark.
   # 'greta_fun' is the greta distribution constructor function (e.g. normal())
@@ -65,26 +72,33 @@ compare_distribution <- function(greta_fun, r_fun, parameters, x,
   # both of these functions must take the same parameters in the same order
   # 'parameters' is an optionally named list of numeric parameter values
   # x is the vector of values at which to evaluate the log density
-  
+
   # define greta distribution, with fixed values
   greta_log_density <- greta_density(
-    greta_fun, parameters, x,
-    dim, multivariate
+    greta_fun,
+    parameters,
+    x,
+    dim,
+    multivariate
   )
   # get R version
   r_log_density <- log(do.call(r_fun, c(list(x), parameters)))
-  
+
   # return absolute difference
   compare_op(r_log_density, greta_log_density, tolerance)
 }
 
 # evaluate the log density of x, given 'parameters' and a distribution
 # constructor function 'fun'
-greta_density <- function(fun, parameters, x,
-                          dim = NULL, multivariate = FALSE) {
-  if (is.null(dim)) {
-    dim <- NROW(x)
-  }
+greta_density <- function(
+    fun,
+    parameters,
+    x,
+    dim = NULL,
+    multivariate = FALSE
+) {
+  
+  dim <- dim %||% NROW(x)
   
   # add the output dimension to the arguments list
   dim_list <- list(dim = dim)
@@ -114,25 +128,22 @@ greta_density <- function(fun, parameters, x,
   
   # create dag
   dag <- dag_class$new(list(x_))
-  dag$define_tf()
-  dag$set_tf_data_list("batch_size", 1L)
-  dag$build_feed_dict()
+  
+  dag$tf_environment$batch_size <- 1L
+  distrib_node$define_tf(dag)
   
   # get the log density as a vector
-  dag$on_graph(
-    result <- dag$evaluate_density(distrib_node, get_node(x_))
-  )
-  assign("test_density", result, dag$tf_environment)
-  
-  density <- dag$tf_sess_run(test_density)
-  as.vector(density)
+  result <- dag$evaluate_density(distrib_node, get_node(x_))
+  as.vector(result)
 }
 
 # execute a call via greta, swapping the objects named in 'swap' to greta
 # arrays, then converting the result back to R. 'swap_scope' tells eval() how
 # many environments to go up to get the objects for the swap; 1 would be
 # environment above the funct, 2 would be the environment above that etc.
-with_greta <- function(call, swap = c("x"), swap_scope = 1) {
+with_greta <- function(call,
+                       swap = c("x"),
+                       swap_scope = 1) {
   swap_entries <- paste0(swap, " = as_data(", swap, ")")
   swap_text <- paste0(
     "list(",
@@ -140,36 +151,39 @@ with_greta <- function(call, swap = c("x"), swap_scope = 1) {
     ")"
   )
   swap_list <- eval(parse(text = swap_text),
-                    envir = parent.frame(n = swap_scope)
+    envir = parent.frame(n = swap_scope)
   )
-  
+
   greta_result <- with(
     swap_list,
     eval(call)
   )
   result <- grab(greta_result)
-  
+
   # account for the fact that greta outputs are 1D arrays; convert them back to
   # R vectors
-  if (is.array(result) && length(dim(result)) == 2 && dim(result)[2] == 1) {
+  if (is.array(result) &&
+    length(dim(result)) == 2 && dim(result)[2] == 1) {
     result <- as.vector(result)
   }
-  
+
   result
 }
 
 # check an expression is equivalent when done in R, and when done on greta
 # arrays with results ported back to R
 # e.g. check_expr(a[1:3], swap = 'a')
-check_expr <- function(expr, swap = c("x"), tolerance = 1e-4) {
+check_expr <- function(expr,
+                       swap = c("x"),
+                       tolerance = 1e-4) {
   call <- substitute(expr)
-  
+
   r_out <- eval(expr)
   greta_out <- with_greta(call,
-                          swap = swap,
-                          swap_scope = 2
+    swap = swap,
+    swap_scope = 2
   )
-  
+
   compare_op(r_out, greta_out, tolerance)
 }
 
@@ -190,22 +204,28 @@ gen_opfun <- function(n, ops) {
   for (i in seq_len(n)) {
     string <- add_op_string(string, ops = ops)
   }
-  
+
   fun_string <- sprintf("function(a, b) {%s}", string)
-  
+
   eval(parse(text = fun_string))
 }
 
 # sample n values from a distribution by HMC, check they all have the correct
 # support greta array is defined as a stochastic in the call
-sample_distribution <- function(greta_array, n = 10,
-                                lower = -Inf, upper = Inf,
+sample_distribution <- function(greta_array,
+                                n = 10,
+                                lower = -Inf,
+                                upper = Inf,
                                 warmup = 1) {
   m <- model(greta_array, precision = "double")
-  draws <- mcmc(m, n_samples = n, warmup = warmup, verbose = FALSE)
+  draws <- mcmc(m,
+    n_samples = n,
+    warmup = warmup,
+    verbose = FALSE
+  )
   samples <- as.matrix(draws)
   vectorised <- length(lower) > 1 | length(upper) > 1
-  
+
   if (vectorised) {
     above_lower <- sweep(samples, 2, lower, `>=`)
     below_upper <- sweep(samples, 2, upper, `<=`)
@@ -213,7 +233,7 @@ sample_distribution <- function(greta_array, n = 10,
     above_lower <- samples >= lower
     below_upper <- samples <= upper
   }
-  
+
   expect_true(all(above_lower & below_upper))
 }
 
@@ -227,7 +247,7 @@ compare_truncated_distribution <- function(greta_fun,
   # is a greta array created from a distribution and a constrained variable
   # greta array. 'r_fun' is an r function returning the log density for the same
   # truncated distribution, taking x as its only argument.
-  
+
   x <- do.call(
     truncdist::rtrunc,
     c(
@@ -238,18 +258,18 @@ compare_truncated_distribution <- function(greta_fun,
       parameters
     )
   )
-  
+
   # create truncated R function and evaluate it
   r_fun <- truncfun(which, parameters, truncation)
   r_log_density <- log(r_fun(x))
-  
+
   greta_log_density <- greta_density(
     fun = greta_fun,
     parameters = c(parameters, list(truncation = truncation)),
     x = x,
     dim = 1
   )
-  
+
   # return absolute difference
   compare_op(r_log_density, greta_log_density, tolerance)
 }
@@ -263,7 +283,7 @@ truncfun <- function(which = "norm", parameters, truncation) {
     b = truncation[2],
     parameters
   )
-  
+
   function(x) {
     arg_list <- c(x = list(x), args)
     do.call(truncdist::dtrunc, arg_list)
@@ -296,7 +316,9 @@ qt_ls <- function(p, df, location, scale, log.p = FALSE) {
 }
 
 # mock up the progress bar to force its output to stdout for testing
-cpb <- eval(parse(text = capture.output(dput(create_progress_bar))))
+cpb <- eval(parse(text = capture.output(dput(
+  create_progress_bar
+))))
 mock_create_progress_bar <- function(...) {
   cpb(..., stream = stdout())
 }
@@ -309,15 +331,19 @@ get_output <- function(expr) {
   i <- 0
   suppressMessages(withCallingHandlers(
     expr,
-    message = function(e) msgs[[i <<- i + 1]] <<- conditionMessage(e)
+    message = function(e) {
+      msgs[[i <<- i + 1]] <<- conditionMessage(e)
+    }
   ))
   paste0(msgs, collapse = "")
 }
 
 # mock up mcmc progress bar output for neurotic testing
 mock_mcmc <- function(n_samples = 1010) {
-  pb <- create_progress_bar("sampling", c(0, n_samples),
-                            pb_update = 10, width = 50
+  pb <- create_progress_bar("sampling",
+    c(0, n_samples),
+    pb_update = 10,
+    width = 50
   )
   iterate_progress_bar(pb, n_samples, rejects = 10, chains = 1)
 }
@@ -328,7 +354,7 @@ rlkjcorr <- function(n, eta = 1, dimension = 2) {
   k <- dimension
   stopifnot(is.numeric(k), k >= 2, k == as.integer(k))
   stopifnot(eta > 0)
-  
+
   f <- function() {
     alpha <- eta + (k - 2) / 2
     r12 <- 2 * stats::rbeta(1, alpha, alpha) - 1
@@ -336,7 +362,7 @@ rlkjcorr <- function(n, eta = 1, dimension = 2) {
     r[1, 1] <- 1
     r[1, 2] <- r12
     r[2, 2] <- sqrt(1 - r12^2)
-    
+
     if (k > 2) {
       for (m in 2:(k - 1)) {
         alpha <- alpha - 0.5
@@ -347,27 +373,29 @@ rlkjcorr <- function(n, eta = 1, dimension = 2) {
         r[m + 1, m + 1] <- sqrt(1 - y)
       }
     }
-    
+
     crossprod(r)
   }
-  
+
   r <- replicate(n, f())
-  
+
   if (dim(r)[3] == 1) {
     r <- r[, , 1]
   } else {
     r <- aperm(r, c(3, 1, 2))
   }
-  
+
   r
 }
 
 # helper RNG functions
-rmvnorm <- function(n, mean, Sigma) { # nolint
+rmvnorm <- function(n, mean, Sigma) {
+  # nolint
   mvtnorm::rmvnorm(n = n, mean = mean, sigma = Sigma)
 }
 
-rwish <- function(n, df, Sigma) { # nolint
+rwish <- function(n, df, Sigma) {
+  # nolint
   draws <- stats::rWishart(n = n, df = df, Sigma = Sigma)
   aperm(draws, c(3, 1, 2))
 }
@@ -429,21 +457,33 @@ rtf <- function(n, df1, df2, truncation) {
 # joint testing functions
 joint_normals <- function(...) {
   params_list <- list(...)
-  components <- lapply(params_list, function(par) do.call(normal, par))
+  components <-
+    lapply(params_list, function(par) {
+      do.call(normal, par)
+    })
   do.call(joint, components)
 }
 
 rjnorm <- function(n, ...) {
   params_list <- list(...)
-  args_list <- lapply(params_list, function(par) c(n, par))
-  sims <- lapply(args_list, function(par) do.call(stats::rnorm, par))
+  args_list <- lapply(params_list, function(par) {
+    c(n, par)
+  })
+  sims <-
+    lapply(args_list, function(par) {
+      do.call(stats::rnorm, par)
+    })
   do.call(cbind, sims)
 }
 
 rjtnorm <- function(n, ...) {
   params_list <- list(...)
-  args_list <- lapply(params_list, function(par) c(n, par))
-  sims <- lapply(args_list, function(par) do.call(rtnorm, par))
+  args_list <- lapply(params_list, function(par) {
+    c(n, par)
+  })
+  sims <- lapply(args_list, function(par) {
+    do.call(rtnorm, par)
+  })
   do.call(cbind, sims)
 }
 
@@ -452,7 +492,10 @@ mixture_normals <- function(...) {
   args <- list(...)
   is_weights <- names(args) == "weights"
   params_list <- args[!is_weights]
-  components <- lapply(params_list, function(par) do.call(normal, par))
+  components <-
+    lapply(params_list, function(par) {
+      do.call(normal, par)
+    })
   do.call(mixture, c(components, args[is_weights]))
 }
 
@@ -474,10 +517,15 @@ rmixnorm <- function(n, ...) {
   is_weights <- names(args) == "weights"
   params_list <- args[!is_weights]
   weights <- args[[which(is_weights)]]
-  args_list <- lapply(params_list, function(par) c(n, par))
-  sims <- lapply(args_list, function(par) do.call(rnorm, par))
+  args_list <- lapply(params_list, function(par) {
+    c(n, par)
+  })
+  sims <- lapply(args_list, function(par) {
+    do.call(rnorm, par)
+  })
   draws <- do.call(cbind, sims)
-  components <- sample.int(length(sims), n, prob = weights, replace = TRUE)
+  components <-
+    sample.int(length(sims), n, prob = weights, replace = TRUE)
   idx <- cbind(seq_len(n), components)
   draws[idx]
 }
@@ -487,10 +535,15 @@ rmixtnorm <- function(n, ...) {
   is_weights <- names(args) == "weights"
   params_list <- args[!is_weights]
   weights <- args[[which(is_weights)]]
-  args_list <- lapply(params_list, function(par) c(n, par))
-  sims <- lapply(args_list, function(par) do.call(rtnorm, par))
+  args_list <- lapply(params_list, function(par) {
+    c(n, par)
+  })
+  sims <- lapply(args_list, function(par) {
+    do.call(rtnorm, par)
+  })
   draws <- do.call(cbind, sims)
-  components <- sample.int(length(sims), n, prob = weights, replace = TRUE)
+  components <-
+    sample.int(length(sims), n, prob = weights, replace = TRUE)
   idx <- cbind(seq_len(n), components)
   draws[idx]
 }
@@ -500,11 +553,16 @@ rmixmvnorm <- function(n, ...) {
   is_weights <- names(args) == "weights"
   params_list <- args[!is_weights]
   weights <- args[[which(is_weights)]]
-  args_list <- lapply(params_list, function(par) c(n, par))
-  sims <- lapply(args_list, function(par) do.call(rmvnorm, par))
-  
-  components <- sample.int(length(sims), n, prob = weights, replace = TRUE)
-  
+  args_list <- lapply(params_list, function(par) {
+    c(n, par)
+  })
+  sims <- lapply(args_list, function(par) {
+    do.call(rmvnorm, par)
+  })
+
+  components <-
+    sample.int(length(sims), n, prob = weights, replace = TRUE)
+
   # loop through the n observations, pulling out the corresponding slice
   draws_out <- array(NA, dim(sims[[1]]))
   for (i in seq_len(n)) {
@@ -534,24 +592,25 @@ compare_iid_samples <- function(greta_fun,
                                 nsim = 200,
                                 p_value_threshold = 0.001) {
   greta_array <- do.call(greta_fun, parameters)
-  
+
   # get information about distribution
   distribution <- get_node(greta_array)$distribution
   multivariate <- distribution$multivariate
   discrete <- distribution$discrete
   name <- distribution$distribution_name
-  
+
   greta_samples <- calculate(greta_array, nsim = nsim)[[1]]
   r_samples <- do.call(r_fun, c(n = nsim, parameters))
-  
+
   # reshape to matrix or vector
   if (multivariate) {
-    
     # if it's a symmetric matrix, take only a triangle and flatten it
     if (name %in% c("wishart", "lkj_correlation")) {
       include_diag <- name == "wishart"
-      t_greta_samples <- apply(greta_samples, 1, get_upper_tri, include_diag)
-      t_r_samples <- apply(r_samples, 1, get_upper_tri, include_diag)
+      t_greta_samples <-
+        apply(greta_samples, 1, get_upper_tri, include_diag)
+      t_r_samples <-
+        apply(r_samples, 1, get_upper_tri, include_diag)
       greta_samples <- t(t_greta_samples)
       r_samples <- t(t_r_samples)
     } else {
@@ -563,14 +622,14 @@ compare_iid_samples <- function(greta_fun,
   } else {
     greta_samples <- as.vector(greta_samples)
   }
-  
+
   # find a vaguely appropriate test
   if (discrete) {
     test <- ifelse(multivariate, combined_chisq_test, stats::chisq.test)
   } else {
     test <- ifelse(multivariate, cramer::cramer.test, stats::ks.test)
   }
-  
+
   # do Kolmogorov Smirnov test on samples
   suppressWarnings(test_result <- test(greta_samples, r_samples))
   testthat::expect_gte(test_result$p.value, p_value_threshold)
@@ -589,14 +648,17 @@ skip_if_not_release <- function() {
 # the two IID random number generators for the data generating function
 # ('p_theta' = generator for the prior, 'p_x_bar_theta' = generator for the
 # likelihood), 'niter' the number of MCMC samples to compare
-check_geweke <- function(sampler, model, data,
-                         p_theta, p_x_bar_theta,
-                         niter = 2000, warmup = 1000,
+check_geweke <- function(sampler,
+                         model,
+                         data,
+                         p_theta,
+                         p_x_bar_theta,
+                         niter = 2000,
+                         warmup = 1000,
                          title = "Geweke test") {
-  
   # sample independently
   target_theta <- p_theta(niter)
-  
+
   # sample with Markov chain
   greta_theta <- p_theta_greta(
     niter = niter,
@@ -607,64 +669,67 @@ check_geweke <- function(sampler, model, data,
     sampler = sampler,
     warmup = warmup
   )
-  
+
   # visualise correspondence
   quants <- (1:99) / 100
   q1 <- stats::quantile(target_theta, quants)
   q2 <- stats::quantile(greta_theta, quants)
   plot(q2, q1, main = title)
   graphics::abline(0, 1)
-  
+
   # do a formal hypothesis test
-  suppressWarnings(stat <- stats::ks.test(target_theta, greta_theta))
+  suppressWarnings(stat <-
+    stats::ks.test(target_theta, greta_theta))
   testthat::expect_gte(stat$p.value, 0.005)
 }
 
 # sample from a prior on theta the long way round, fro use in a Geweke test:
 # gibbs sampling the posterior p(theta | x) and the data generating function p(x
 # | theta). Only retain the samples of theta from the joint distribution,
-p_theta_greta <- function(niter, model, data,
-                          p_theta, p_x_bar_theta,
+p_theta_greta <- function(niter,
+                          model,
+                          data,
+                          p_theta,
+                          p_x_bar_theta,
                           sampler = hmc(),
                           warmup = 1000) {
-  
   # set up and initialize trace
   theta <- rep(NA, niter)
   theta[1] <- p_theta(1)
-  
+
   # set up and tune sampler
-  draws <- mcmc(model,
-                warmup = warmup,
-                n_samples = 1,
-                chains = 1,
-                sampler = sampler,
-                verbose = FALSE
+  draws <- mcmc(
+    model,
+    warmup = warmup,
+    n_samples = 1,
+    chains = 1,
+    sampler = sampler,
+    verbose = FALSE
   )
-  
+
   # now loop through, sampling and updating x and returning theta
   for (i in 2:niter) {
-    
     # sample x given theta
     x <- p_x_bar_theta(theta[i - 1])
-    
+
     # put x in the data list
     dag <- model$dag
     target_name <- dag$tf_name(get_node(data))
     x_array <- array(x, dim = c(1, dim(data)))
     dag$tf_environment$data_list[[target_name]] <- x_array
-    
+
     # put theta in the free state
     sampler <- attr(draws, "model_info")$samplers[[1]]
     sampler$free_state <- as.matrix(theta[i - 1])
-    
+
     draws <- extra_samples(draws,
-                           n_samples = 1,
-                           verbose = FALSE
+      n_samples = 1,
+      verbose = FALSE
     )
-    
+
     theta[i] <- tail(as.numeric(draws[[1]]), 1)
   }
-  
+
   theta
 }
 
@@ -702,24 +767,25 @@ get_enough_draws <- function(model,
                              one_by_one = FALSE) {
   start_time <- Sys.time()
   draws <- mcmc(model,
-                sampler = sampler,
-                verbose = verbose,
-                one_by_one = one_by_one
+    sampler = sampler,
+    verbose = verbose,
+    one_by_one = one_by_one
   )
-  
+
   while (not_finished(draws, n_effective) &
-         not_timed_out(start_time, time_limit)) {
+    not_timed_out(start_time, time_limit)) {
     n_samples <- new_samples(draws, n_effective)
-    draws <- extra_samples(draws, n_samples,
-                           verbose = verbose,
-                           one_by_one = one_by_one
+    draws <- extra_samples(draws,
+      n_samples,
+      verbose = verbose,
+      one_by_one = one_by_one
     )
   }
-  
+
   if (not_finished(draws, n_effective)) {
     stop("could not draws enough effective samples within the time limit")
   }
-  
+
   draws
 }
 
@@ -728,22 +794,22 @@ mcse <- function(draws) {
   n <- nrow(draws)
   b <- floor(sqrt(n))
   a <- floor(n / b)
-  
+
   group <- function(k) {
     idx <- ((k - 1) * b + 1):(k * b)
     colMeans(draws[idx, , drop = FALSE])
   }
-  
+
   bm <- vapply(
     seq_len(a),
     group,
     draws[1, ]
   )
-  
+
   if (is.null(dim(bm))) {
     bm <- t(bm)
   }
-  
+
   mu_hat <- as.matrix(colMeans(draws))
   ss <- sweep(t(bm), 2, mu_hat, "-")^2
   var_hat <- b * colSums(ss) / (a - 1)
@@ -761,19 +827,18 @@ scaled_error <- function(draws, expectation) {
 # given a sampler (e.g. hmc()) and minimum number of effective samples, ensure
 # that the sampler can draw correct samples from a bivariate normal distribution
 check_mvn_samples <- function(sampler, n_effective = 3000) {
-  
   # get multivariate normal samples
   mu <- as_data(t(rnorm(2, 0, 5)))
   sigma <- stats::rWishart(1, 3, diag(2))[, , 1]
   x <- multivariate_normal(mu, sigma)
   m <- model(x, precision = "single")
-  
+
   draws <- get_enough_draws(m,
-                            sampler = sampler,
-                            n_effective = n_effective,
-                            verbose = FALSE
+    sampler = sampler,
+    n_effective = n_effective,
+    verbose = FALSE
   )
-  
+
   # get MCMC samples for statistics of the samples (value, variance and
   # correlation of error wrt mean)
   err <- x - mu
@@ -781,7 +846,7 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
   corr <- prod(err) / prod(sqrt(diag(sigma)))
   err_var_corr <- c(err, var, corr)
   stat_draws <- calculate(err_var_corr, values = draws)
-  
+
   # get true values of these - on average the error should be 0, and the
   # variance and correlation of the errors should encoded in Sigma
   stat_truth <- c(
@@ -789,7 +854,7 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
     diag(sigma),
     cov2cor(sigma)[1, 2]
   )
-  
+
   # get absolute errors between posterior means and true values, and scale them
   # by time-series Monte Carlo standard errors (the expected amount of
   # uncertainty in the MCMC estimate), to give the number of standard errors
@@ -803,35 +868,142 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
 # compare the samples with iid samples returned by iid_function (which takes the
 # number of arguments as its sole argument), producing a labelled qqplot, and
 # running a KS test for differences between the two samples
-check_samples <- function(x,
-                          iid_function,
-                          sampler = hmc(),
-                          n_effective = 3000,
-                          title = NULL,
-                          one_by_one = FALSE) {
+# sample values of greta array 'x' (which must follow a distribution), and
+# compare the samples with iid samples returned by iid_function (which takes the
+# number of arguments as its sole argument), producing a labelled qqplot, and
+# running a KS test for differences between the two samples
+check_samples <- function(
+    x,
+    iid_function,
+    sampler = hmc(),
+    n_effective = 3000,
+    title = NULL,
+    one_by_one = FALSE,
+    time_limit = 300
+) {
   m <- model(x, precision = "single")
-  draws <- get_enough_draws(m,
-                            sampler = sampler,
-                            n_effective = n_effective,
-                            verbose = FALSE,
-                            one_by_one = one_by_one
+  draws <- get_enough_draws(
+    model = m,
+    sampler = sampler,
+    n_effective = n_effective,
+    verbose = TRUE,
+    one_by_one = one_by_one,
+    time_limit = time_limit
   )
   
   neff <- coda::effectiveSize(draws)
   iid_samples <- iid_function(neff)
   mcmc_samples <- as.matrix(draws)
   
-  # plot
-  if (is.null(title)) {
-    distrib <- get_node(x)$distribution$distribution_name
-    sampler_name <- class(sampler)[1]
-    title <- paste(distrib, "with", sampler_name)
-  }
+  thin_amount <- find_thinning(draws)
   
-  stats::qqplot(mcmc_samples, iid_samples, main = title)
+  mcmc_samples <- do_thinning(mcmc_samples, thin_amount)
+  iid_samples <- do_thinning(iid_samples, thin_amount)
+  
+  list(
+    mcmc_samples = mcmc_samples,
+    iid_samples = iid_samples,
+    distrib = get_distribution_name(x),
+    sampler_name = class(sampler)[1]
+  )
+}
+
+
+qqplot_checked_samples <- function(checked_samples, title){
+  
+  distrib <- checked_samples$distrib
+  sampler_name <- checked_samples$sampler_name
+  title <- paste(distrib, "with", sampler_name)
+  
+  mcmc_samples <- checked_samples$mcmc_samples
+  iid_samples <- checked_samples$iid_samples
+  
+  stats::qqplot(
+    x = mcmc_samples,
+    y = iid_samples,
+    main = title
+  )
+  
   graphics::abline(0, 1)
-  
+}
+
+
+## helpers for running Kolmogorov-Smirnov test for MCMC samples vs IID samples
+ks_test_mcmc_vs_iid <- function(checked_samples){
   # do a formal hypothesis test
-  suppressWarnings(stat <- ks.test(mcmc_samples, iid_samples))
-  testthat::expect_gte(stat$p.value, 0.01)
+  suppressWarnings(stat <- ks.test(checked_samples$mcmc_samples,
+                                   checked_samples$iid_samples))
+  stat
+}
+
+## helpers for looping through optimisers
+run_opt <- function(
+    m,
+    optmr,
+    max_iterations = 200
+) {
+  opt(
+    m,
+    optimiser = optmr(),
+    max_iterations = max_iterations
+  )
+}
+
+# discrete lognormal
+
+# zero inflated poisson using distributional
+
+dist_zero_inflated_pois <- function(lambda, pi) {
+  distributional::dist_inflated(
+    dist = distributional::dist_poisson(lambda = lambda),
+    prob = pi,
+    x = 0
+  )
+}
+
+dist_zero_inflated_negative_binomial <-
+  function(size, prob, pi) {
+    distributional::dist_inflated(
+      dist = distributional::dist_negative_binomial(
+        size = size,
+        prob = prob
+      ),
+      prob = pi,
+      x = 0
+    )
+  }
+
+sample_zero_inflated_pois <- function(n, lambda, pi) {
+  distributional::generate(
+    x = dist_zero_inflated_pois(lambda = lambda, pi = pi),
+    n
+  )[[1]]
+}
+
+sample_zero_inflated_neg_binomial <-
+  function(n, size, lambda, pi) {
+    distributional::generate(
+      x = dist_zero_inflated_pois(lambda = lambda, pi = pi),
+      n
+    )[[1]]
+  }
+
+# zero-inflated distribution from rethinking package
+dzipois <- function(x, theta, lambda, log = FALSE) {
+  ll <-
+    ifelse(x == 0,
+      theta + (1 - theta) * exp(-lambda),
+      (1 - theta) * dpois(x, lambda, FALSE)
+    )
+  if (log) {
+    return(log(ll))
+  } else {
+    return(ll)
+  }
+}
+
+
+# zero-inflated negative binomial likelihood from likelihoodExplore package
+dzinb <- function(x, theta, size, prob, log = FALSE) {
+  return(likelihoodExplore::liknbinom(x, size = size, prob = prob, log = log))
 }

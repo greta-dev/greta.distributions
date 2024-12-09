@@ -2,7 +2,9 @@
 
 export(discrete_lognormal)
 export(discrete_normal)
-import(R6)
+export(zero_inflated_negative_binomial)
+export(zero_inflated_poisson)
 importFrom(R6,R6Class)
 importFrom(greta,.internals)
 importFrom(tensorflow,tf)
+importFrom(utils,globalVariables)
