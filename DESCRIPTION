@@ -21,7 +21,7 @@ Description: Provides extra distributions for use with the 'greta' package.
   These will include distributions such as zero inflated negative binomial,
   zero inflated poisson, interval censored lognormal, and more.
 License: Apache License 2.0
-URL: https://github.com/greta-dev/greta.distributions
+URL: https://github.com/greta-dev/greta.distributions, https://greta-dev.github.io/greta.distributions/
 BugReports: https://github.com/greta-dev/greta.distributions/issues
 Depends: 
     greta (>= 0.5.0),
