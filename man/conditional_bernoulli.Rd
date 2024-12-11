@@ -45,6 +45,16 @@ a species was detected at each visit, and the probability of detection
 indicating whether the species was present (assumed to be the same at all
 visits) and the probability of being present.
 }
+\examples{
+\dontrun{
+cb <- conditional_bernoulli(
+  p = matrix(c(0.1,0.9), ncol = 2), 
+  psi = c(0.9),
+  dim = 1
+  )
+cb
+}
+}
 \references{
 MacKenzie, D. I., Nichols, J. D., Lachman, G. B., Droege, S.,
 Andrew Royle, J., & Langtimm, C. A. (2002). Estimating site occupancy rates

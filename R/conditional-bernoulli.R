@@ -71,69 +71,12 @@ conditional_bernoulli_distribution <- R6::R6Class(
       
       # check dimensions of p
       check_if_2d_array(p)
-      if (ncol(p) < 2 | length(dim(p)) != 2) {
-        msg <- cli::format_error(
-          c(
-            "{.var p} must be a 2D array with at least two columns",
-            "but {.var p} has dimensions {paste(dim(p), collapse = 'x')}"
-          )
-        ) 
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
-
-      # check dimensions of psi
-      if (ncol(psi) != 1 | length(dim(psi)) != 2) {
-        msg <- cli::format_error(
-          c(
-            "{.var psi} must be a 2D array with one column",
-            "but {.var psi} has dimensions {paste(dim(psi), collapse = 'x')}"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
-
+      check_if_2d_gte_two_col(p)
+      check_if_2d_one_col(psi)
       # compare possible dimensions
-      dim_p <- nrow(p)
-      dim_psi <- nrow(psi)
+      check_params_same_rows(p, psi)
 
-      if (dim_p != dim_psi) {
-        msg <- cli::format_error(
-          c(
-            "{.var p} and {.var psi} must have the same number of rows",
-            "But we see {.var p} and {.var psi} have:",
-            "{.var p}: {dim_p} {?row/rows}",
-            "{.var psi}: {dim_psi} {?row/rows}",
-            "Perhaps you need to coerce {.var p} or {.var psi} to an \\
-            appropriate matrix?"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
-
-      # check dim is a positive scalar integer
-      dim_old <- dim
-      dim <- as.integer(dim)
-      if (length(dim) > 1 || dim <= 0 || !is.finite(dim)) {
-        msg <- cli::format_error(
-          c(
-            "{.var dim} must be a scalar positive integer, but was:",
-            "{dim_old}"
-          )
-        )
-        stop(
-          msg,
-          call. = FALSE
-        )
-      }
+      check_dim_positive_scalar_int(dim)
       
       # check p and psi are between 0 and 1
       check_valid_probability(p_val, var_name = "p")
@@ -174,6 +117,7 @@ conditional_bernoulli_distribution <- R6::R6Class(
 
       list(
         log_prob = log_prob,
+        sample = NULL,
         cdf = NULL,
         log_cdf = NULL
       )
