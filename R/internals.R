@@ -1,5 +1,4 @@
 # need some internal greta functions accessible
-
 check_dims <- .internals$checks$check_dims
 check_in_family <- .internals$checks$check_in_family
 check_positive <- .internals$checks$check_positive
