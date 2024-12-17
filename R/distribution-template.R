@@ -211,6 +211,10 @@ build_greta_dist_r <- function(dist_name, dist_arg_list){
 #'   )
 greta_distribution_template <- function(dist_name, dist_arg_list){
   
+  # TODO
+  # Add defensive code testing for distribution name and argument list
+  # e.g., check distribution doesn't already exist, check valid text inputs
+  
   
   build_definition <- build_greta_dist_definition(dist_name, dist_arg_list)
   build_initialize <- build_greta_dist_init(dist_name, dist_arg_list)
