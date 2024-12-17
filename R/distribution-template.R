@@ -124,8 +124,8 @@ build_greta_dist_log_prob <- function(dist_name, dist_arg_list){
            [param_list]
         )
         
-        # This is where you'll need to write your own methods for computing
-  # the density in tensorflow
+        # If your distribution does not exist in Tensorflow probability, you 
+        # will need to write your own log prob - the density. See https://github.com/greta-dev/greta.distributions/blob/main/R/zero_inflated_negative_binomial.R for an example of this
     }
   
   ",
@@ -151,7 +151,7 @@ build_greta_dist_sample <- function(dist_name, dist_arg_list){
   sample <- function(seed) {
     
     # you will need to check that the name of the distribution exists
-    # in tensorflow - this is just a simple starter helper
+    # in tensorflow probability - this is just a simple starter helper
     # see https://www.tensorflow.org/probability/api_docs/python/tfp/distributions
     # for a list of distributions
     d <- tfp$distributions$[dist_name](
@@ -160,9 +160,15 @@ build_greta_dist_sample <- function(dist_name, dist_arg_list){
     continuous <- d$sample(seed = seed)
     tf$floor(continuous)
     
+    # If your distribution does not exist in Tensorflow probability, you 
+    # will need to write your own sampler. See https://github.com/greta-dev/greta.distributions/blob/main/R/zero_inflated_negative_binomial.R for an example of this
+    
   }
   
-  list(log_prob = log_prob, sample = sample)
+  list(
+    log_prob = log_prob, 
+    sample = sample
+    )
   
   }
   ) 
