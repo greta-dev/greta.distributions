@@ -6,10 +6,10 @@ test_that("{dist_name} distribution has correct density", {
   compare_distribution(
     greta_fun = {dist_name},
     r_fun = TODO-YOUR-RANDOM-SAMPLING-FUNCTION,
-    # e.g., rnorm, 
-    #
+    # e.g., rnorm, extraDist::...
+    # see for example:
     parameters = list(lambda = 2, pi = 0.2),
-    x = sample_zero_inflated_pois(
+    x = extraDist::rzip(
       n = 100,
       lambda = 2,
       pi = 0.2
@@ -17,4 +17,8 @@ test_that("{dist_name} distribution has correct density", {
   )
 })
 '
+  templated_test <- glue::glue(template)
+  # test test file exists...
+  
+  
 }
