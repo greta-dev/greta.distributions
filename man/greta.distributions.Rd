@@ -7,8 +7,21 @@
 \description{
 describe your package here, you can re-use the text from DESCRIPTION
 }
-\examples{
-
-# add a simple example here to introduce the package!
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/greta-dev/greta.distributions}
+  \item Report bugs at \url{https://github.com/greta-dev/greta.distributions/issues}
+}
 
 }
+\author{
+\strong{Maintainer}: Nicholas Tierney \email{nicholas.tierney@gmail.com} (\href{https://orcid.org/0000-0003-1460-8722}{ORCID})
+
+Authors:
+\itemize{
+  \item Nick Golding \email{nick.golding.research@gmail.com} (\href{https://orcid.org/0000-0001-8916-5570}{ORCID})
+}
+
+}
+\keyword{internal}

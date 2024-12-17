@@ -2,5 +2,9 @@
 
 export(greta_distribution_template)
 export(square)
+export(zero_inflated_negative_binomial)
+export(zero_inflated_poisson)
+importFrom(R6,R6Class)
 importFrom(greta,.internals)
 importFrom(tensorflow,tf)
+importFrom(utils,globalVariables)
