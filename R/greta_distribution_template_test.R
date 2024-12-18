@@ -3,16 +3,18 @@ greta_distribution_template_test <- function(dist_name){
 test_that("[dist_name] distribution has correct density", {
   skip_if_not(check_tf_version())
   
+  param_1 <- 2
+  param_2 <- 0.1
   compare_distribution(
     greta_fun = [dist_name],
     r_fun = TODO_YOUR_RANDOM_SAMPLING_FUNCTION(),
     # e.g., rnorm, extraDist::...
     # see for example:
-    parameters = list(lambda = 2, pi = 0.2),
+    parameters = list(param_1 = param_1, param_2 = param_2),
     x = extraDist::rzip(
       n = 100,
-      lambda = 2,
-      pi = 0.2
+      lambda = param_1,
+      pi = param_2
     )
   )
 })
@@ -28,21 +30,19 @@ test_that("[dist_name] distribution has correct density", {
 }
 
 
-write_new_distribution_test <- function(dist_name){
+write_distribution_test <- function(dist_name){
   template_test_info <- greta_distribution_template_test(dist_name)
   
-  dist_test_path <- paste0(
-    file.path(
+  dist_test_path <- file.path(
       "tests", 
       "testthat",
-      dist_name
-      ),
-    ".R"
-    )
+      glue::glue("test_{dist_name}.R")
+      )
   
   cli::cli_inform(
     message = c(
-      "i" = "Writing new test template for distribution, {.fun dist_name}, to file, {.file {dist_test_path}}"
+      "i" = "Writing new test template for distribution, \\
+      {.fun dist_name}, to {.file {dist_test_path}}."
     )
   )
   
@@ -54,7 +54,7 @@ write_new_distribution_test <- function(dist_name){
   
   cli::cli_inform(
     message = c(
-      "i" = "See {.help greta_distribution_template_test} for details",
+      "i" = "See {.help write_distribution_test} for details"
     )
   )
   
