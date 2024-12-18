@@ -18,3 +18,11 @@ zero_inflated_negative_binomial(size, prob, pi, dim = NULL)
 \description{
 A Zero Inflated Negative Binomial distribution
 }
+\examples{
+\dontrun{
+zinb <- zero_inflated_negative_binomial(size = 2, prob= 0.2, pi = 0.10)
+calculate(zinb, nsim = 10)
+m <- model(zinb)
+mcmc(m)
+}
+}

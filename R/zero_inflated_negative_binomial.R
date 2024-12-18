@@ -5,6 +5,13 @@
 #' @param prob probability parameter (`0 < prob < 1`),
 #' @param pi proportion of zeros
 #' @param dim a scalar giving the number of rows in the resulting greta array
+#' @examples
+#' \dontrun{
+#' zinb <- zero_inflated_negative_binomial(size = 2, prob= 0.2, pi = 0.10)
+#' calculate(zinb, nsim = 10)
+#' m <- model(zinb)
+#' mcmc(m)
+#' }
 #' @export
 zero_inflated_negative_binomial <- function(size, prob, pi, dim = NULL) {
   distrib("zero_inflated_negative_binomial", size, prob, pi, dim)
