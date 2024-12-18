@@ -196,7 +196,10 @@ build_greta_dist_r <- function(dist_name, dist_arg_list){
   )
 }
 
-#' Write out a template greta distribution
+#' Create a template greta distribution
+#' 
+#' This code creates the text of a basic greta distribution. To write the text
+#'   to file, see `write_new_distribution()`.
 #'
 #' @param dist_name character length 1, name of the distribution
 #' @param dist_arg_list character vector, arguments to the distribution
@@ -210,6 +213,9 @@ build_greta_dist_r <- function(dist_name, dist_arg_list){
 #'   dist_arg_list = c("meanlog", "sdlog")
 #'   )
 greta_distribution_template <- function(dist_name, dist_arg_list){
+  
+  check_if_null(dist_name)
+  check_if_null(dist_arg_list)
   
   # TODO
   # Add defensive code testing for distribution name and argument list

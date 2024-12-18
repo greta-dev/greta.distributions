@@ -30,14 +30,12 @@ test_that("[dist_name] distribution has correct density", {
 }
 
 
-write_distribution_test <- function(dist_name){
+write_distribution_test <- function(dist_name, overwrite = FALSE){
   template_test_info <- greta_distribution_template_test(dist_name)
   
-  dist_test_path <- file.path(
-      "tests", 
-      "testthat",
-      glue::glue("test_{dist_name}.R")
-      )
+  dist_test_path <- make_test_path(dist_name)
+  
+  check_if_overwrite(dist_name, overwrite, dist_test_path)
   
   cli::cli_inform(
     message = c(

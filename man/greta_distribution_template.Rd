@@ -2,7 +2,7 @@
 % Please edit documentation in R/distribution-template.R
 \name{greta_distribution_template}
 \alias{greta_distribution_template}
-\title{Write out a template greta distribution}
+\title{Create a template greta distribution}
 \usage{
 greta_distribution_template(dist_name, dist_arg_list)
 }
@@ -15,7 +15,8 @@ greta_distribution_template(dist_name, dist_arg_list)
 text of a basic greta distribution
 }
 \description{
-Write out a template greta distribution
+This code creates the text of a basic greta distribution. To write the text
+to file, see \code{write_new_distribution()}.
 }
 \examples{
 greta_distribution_template(

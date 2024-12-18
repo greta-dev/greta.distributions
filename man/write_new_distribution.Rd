@@ -4,7 +4,11 @@
 \alias{write_new_distribution}
 \title{Write a new greta distribution template file}
 \usage{
-write_new_distribution(dist_name, dist_arg_list)
+write_new_distribution(
+  dist_name = NULL,
+  dist_arg_list = NULL,
+  overwrite = FALSE
+)
 }
 \arguments{
 \item{dist_name}{name of distribution.}
@@ -15,7 +19,10 @@ write_new_distribution(dist_name, dist_arg_list)
 writes to file a new distribution name.
 }
 \description{
-Write a new greta distribution template file
+This generates a starting place for writing a new \code{greta} distribution.
+By default this will save the output to "R/dist_name.R". To save to
+somewhere else, see \code{greta_distribution_template()}, which will generate
+the R code as plain text, and you can then save somewhere else as you wish.
 }
 \examples{
 \dontrun{
