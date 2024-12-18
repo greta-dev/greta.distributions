@@ -44,6 +44,23 @@ test_that("[dist_name] distribution works with calculate", {
 }
 
 
+#' Create a test template for a distribution
+#' 
+#' When you add a new distribution, you want to add a test to cover this
+#'   as well. See also `greta_distribution_template_test()` to see the text
+#'   that is generated if you want to save it somewhere else.
+#'
+#' @param dist_name character, name of distribution
+#' @param overwrite logical. default FALSE. Whether to overwrite the test 
+#'   file if it already exists.
+#'
+#' @returns test file written out to `tests/testthat/test-{dist_name}`
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' write_distribution_test("gumbel")
+#' }
 write_distribution_test <- function(dist_name, overwrite = FALSE){
   template_test_info <- greta_distribution_template_test(dist_name)
   
@@ -58,8 +75,6 @@ write_distribution_test <- function(dist_name, overwrite = FALSE){
     )
   )
   
-  #TODO 
-  # check directory exists
   file.create(dist_test_path)
   writeLines(text = template_test_info,
              con = dist_test_path)

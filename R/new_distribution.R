@@ -7,6 +7,8 @@
 #'
 #' @param dist_name name of distribution.
 #' @param dist_arg_list arguments for distribution.
+#' @param overwrite logical. default FALSE. Whether to overwrite the test 
+#'   file if it already exists.
 #'
 #' @returns writes to file a new distribution name.
 #'
@@ -26,7 +28,6 @@ write_new_distribution <- function(dist_name = NULL,
     dist_name = dist_name,
     dist_arg_list = dist_arg_list
   ) 
-  
   
   dist_path <- make_r_path(dist_name)
   

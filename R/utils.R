@@ -2,7 +2,7 @@ create_a_directory <- function(path){
   if (dir.exists(path)) {
     return(invisible(FALSE))
   }
-  dir.create(path, recurse = TRUE)
+  dir.create(path, recursive = TRUE)
   invisible(TRUE)
 }
 

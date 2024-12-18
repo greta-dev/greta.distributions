@@ -14,6 +14,9 @@ write_new_distribution(
 \item{dist_name}{name of distribution.}
 
 \item{dist_arg_list}{arguments for distribution.}
+
+\item{overwrite}{logical. default FALSE. Whether to overwrite the test
+file if it already exists.}
 }
 \value{
 writes to file a new distribution name.
