@@ -18,8 +18,22 @@ test_that("[dist_name] distribution has correct density", {
     )
   )
 })
-'
-  templated_test <- glue::glue(
+
+test_that("[dist_name] distribution works with calculate", {
+  skip_if_not(check_tf_version())
+  
+  param_1 <- 2
+  param_2 <- 0.1
+  example_[dist_name] <- [dist_name](param_1, param_2)
+  
+  expect_no_error(calculate(example_[dist_name], nsim = 10))
+  expect_no_error(m <- model(example_[dist_name]))
+  expect_no_error(mcmc(m, n_samples = 10, warmup = 10))
+    
+})  
+  '
+  
+    templated_test <- glue::glue(
     template,
     .open = "[",
     .close = "]"
