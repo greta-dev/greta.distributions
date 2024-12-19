@@ -12,6 +12,7 @@ describe your package here, you can re-use the text from DESCRIPTION
 Useful links:
 \itemize{
   \item \url{https://github.com/greta-dev/greta.distributions}
+  \item \url{https://greta-dev.github.io/greta.distributions/}
   \item Report bugs at \url{https://github.com/greta-dev/greta.distributions/issues}
 }
 

@@ -32,7 +32,8 @@ Imports:
     progress,
     R6,
     tensorflow (== 2.16.0),
-    rlang
+    rlang,
+    styler
 Suggests: 
     coda,
     covr,

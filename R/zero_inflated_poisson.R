@@ -6,7 +6,12 @@
 #' @param lambda rate parameter
 #' @param pi proportion of zeros
 #' @param dim a scalar giving the number of rows in the resulting greta array
-#' @importFrom R6 R6Class
+#' @examples
+#' \dontrun{
+#' zip <- zero_inflated_poisson(lambda = 2, pi = 0.2)
+#' calculate(zip, nsim = 10)
+#' mcmc(m)
+#' }
 #' @export
 zero_inflated_poisson <- function (lambda, pi, dim = NULL) {
   distrib('zero_inflated_poisson', lambda, pi, dim)

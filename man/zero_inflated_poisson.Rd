@@ -16,3 +16,10 @@ zero_inflated_poisson(lambda, pi, dim = NULL)
 \description{
 A zero inflated poisson distribution.
 }
+\examples{
+\dontrun{
+zip <- zero_inflated_poisson(lambda = 2, pi = 0.2)
+calculate(zip, nsim = 10)
+mcmc(m)
+}
+}
