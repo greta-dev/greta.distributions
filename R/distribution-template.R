@@ -208,11 +208,11 @@ build_greta_dist_r <- function(dist_name, dist_arg_list){
 #' @export
 #'
 #' @examples
-#' greta_distribution_template(
+#' greta_dist_template(
 #'   dist_name = "lognormal", 
 #'   dist_arg_list = c("meanlog", "sdlog")
 #'   )
-greta_distribution_template <- function(dist_name, dist_arg_list){
+greta_dist_template <- function(dist_name, dist_arg_list){
   
   check_if_null(dist_name)
   check_if_null(dist_arg_list)
