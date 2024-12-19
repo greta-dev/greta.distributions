@@ -7,18 +7,19 @@
 write_distribution_test(dist_name, overwrite = FALSE)
 }
 \arguments{
-\item{dist_name}{character, name of distribution}
+\item{dist_name}{character, name of distribution.}
 
-\item{overwrite}{logical. default FALSE. Whether to overwrite the test
+\item{overwrite}{logical. Default is FALSE. Whether to overwrite the test
 file if it already exists.}
 }
 \value{
-test file written out to \code{tests/testthat/test-{dist_name}}
+test file written out to \code{tests/testthat/test-{dist_name}}.
 }
 \description{
-When you add a new distribution, you want to add a test to cover this
-as well. See also \code{greta_distribution_template_test()} to see the text
-that is generated if you want to save it somewhere else.
+When you add a new distribution, you want to add a test to make sure it is
+behaving as expected. This function generates a test template. See also
+\code{greta_distribution_template_test()} to see the text generated if you want
+to save it somewhere else.
 }
 \examples{
 \dontrun{

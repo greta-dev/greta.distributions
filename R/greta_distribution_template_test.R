@@ -1,3 +1,17 @@
+#' Create a test template for a distribution
+#' 
+#' When you add a new distribution, you want to add a test to make sure it is
+#'   behaving as expected. This function generates a test template. It only 
+#'   creates the text, it does not write to file. See 
+#'   `write_distribution_test()` to write the test to file automatically.
+#'
+#' @param dist_name character. A distribution name. E.g., "lognormal"
+#'
+#' @returns text containing test template code
+#'
+#' @examples
+#' gumbel <- greta_distribution_template_test("gumbel")
+#' @export
 greta_distribution_template_test <- function(dist_name){
   template <- '
 test_that("[dist_name] distribution has correct density", {
@@ -46,15 +60,16 @@ test_that("[dist_name] distribution works with calculate", {
 
 #' Create a test template for a distribution
 #' 
-#' When you add a new distribution, you want to add a test to cover this
-#'   as well. See also `greta_distribution_template_test()` to see the text
-#'   that is generated if you want to save it somewhere else.
+#' When you add a new distribution, you want to add a test to make sure it is
+#'   behaving as expected. This function generates a test template. See also 
+#'  `greta_distribution_template_test()` to see the text generated if you want 
+#'  to save it somewhere else.
 #'
-#' @param dist_name character, name of distribution
-#' @param overwrite logical. default FALSE. Whether to overwrite the test 
+#' @param dist_name character, name of distribution.
+#' @param overwrite logical. Default is FALSE. Whether to overwrite the test 
 #'   file if it already exists.
 #'
-#' @returns test file written out to `tests/testthat/test-{dist_name}`
+#' @returns test file written out to `tests/testthat/test-{dist_name}`.
 #' @export
 #'
 #' @examples
