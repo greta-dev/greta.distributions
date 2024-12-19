@@ -63,6 +63,16 @@
 
 </dl></div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="va">zinb</span> <span class="op">&lt;-</span> <span class="fu">zero_inflated_negative_binomial</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span>, prob<span class="op">=</span> <span class="fl">0.2</span>, pi <span class="op">=</span> <span class="fl">0.10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">calculate</span><span class="op">(</span><span class="va">zinb</span>, nsim <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">model</span><span class="op">(</span><span class="va">zinb</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">mcmc</span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

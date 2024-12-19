@@ -8,7 +8,11 @@
 <url><loc>https://greta-dev.github.io/greta.distributions/index.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta.distributions/news/index.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta.distributions/reference/greta.distributions.html</loc></url>
+<url><loc>https://greta-dev.github.io/greta.distributions/reference/greta_distribution_template.html</loc></url>
+<url><loc>https://greta-dev.github.io/greta.distributions/reference/greta_distribution_template_test.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta.distributions/reference/index.html</loc></url>
+<url><loc>https://greta-dev.github.io/greta.distributions/reference/write_distribution_test.html</loc></url>
+<url><loc>https://greta-dev.github.io/greta.distributions/reference/write_new_distribution.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta.distributions/reference/zero_inflated_negative_binomial.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta.distributions/reference/zero_inflated_poisson.html</loc></url>
 </urlset>
