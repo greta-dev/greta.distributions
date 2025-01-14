@@ -15,6 +15,21 @@ test_that("zero inflated poisson distribution has correct density", {
   )
 })
 
+test_that("zero inflated poisson distribution works with calculate", {
+  skip_if_not(check_tf_version())
+  
+  param_lambda <- 2
+  param_pi <- 0.1
+  example_zip <- zero_inflated_poisson(
+    lambda = param_lambda, 
+    pi = param_pi
+  )
+  
+  expect_no_error(calculate(example_zip, nsim = 10))
+  expect_no_error(m <- model(example_zip))
+  expect_no_error(mcmc(m, n_samples = 10, warmup = 10))
+})
+
 test_that("zero inflated negative binomial distribution has correct density", {
   skip_if_not(check_tf_version())
 
@@ -28,25 +43,21 @@ test_that("zero inflated negative binomial distribution has correct density", {
   )
 })
 
-# test_that("samplers are unbiased for zip", {
-#   skip_if_not(check_tf_version())
-#   
-#   x <- zero_inflated_poisson(0.1, 0.2)
-#   iid <- function(n) {
-#     extraDistr::rzip(n = n, lamb = 0.1, pi = 0.2)
-#   }
-#   
-#   zip_checked <- check_samples(
-#     x = x,
-#     iid_function = iid,
-#     one_by_one = TRUE
-#   )
-#   
-#   # do the plotting
-#   qqplot_checked_samples(zip_checked)
-#   
-#   # do a formal hypothesis test
-#   stat <- ks_test_mcmc_vs_iid(lkj_checked)
-#   
-#   expect_gte(stat$p.value, 0.01)
-# })
+
+test_that("zero inflated negative binomialdistribution works with calculate", {
+  skip_if_not(check_tf_version())
+  
+  param_size <- 2
+  param_prob <- 0.2
+  param_pi <- 0.1
+  
+  example_zinb <- zero_inflated_negative_binomial(
+    size = param_size,
+    prob = param_prob,
+    pi = param_pi
+  )
+  
+  expect_no_error(calculate(example_zinb, nsim = 10))
+  expect_no_error(m <- model(example_zinb))
+  expect_no_error(mcmc(m, n_samples = 10, warmup = 10))
+})
