@@ -1,0 +1,48 @@
+---
+title: "How To Add a New Distribution"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{How To Add a New Distribution}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(greta.distributions)
+```
+
+There are two main functions to help create and add new distributions to greta. These are:
+
+- greta_dist_template(), and
+- greta_dist_template_test()
+
+These work by specifying the name of the distribution, and parameters. E.g.,
+
+```{r}
+gumbel_template <- greta_dist_template(
+  dist_name = "gumbel",
+  dist_arg_list = c("scale", "loc")
+)
+
+gumbel_template
+```
+
+We have the functions:
+
+- `greta_dist_write()`, and
+- `greta_dist_write_test()`
+
+```{r}
+greta_dist_write(
+  dist_name = "lognormal", 
+  dist_arg_list = c("meanlog", "sdlog")
+  )
+```
+

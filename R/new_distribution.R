@@ -2,7 +2,7 @@
 #' 
 #' This generates a starting place for writing a new `greta` distribution.
 #'   By default this will save the output to "R/dist_name.R". To save to 
-#'   somewhere else, see `greta_distribution_template()`, which will generate
+#'   somewhere else, see `greta_dist_template()`, which will generate
 #'   the R code as plain text, and you can then save somewhere else as you wish.
 #'
 #' @param dist_name name of distribution.
@@ -20,11 +20,11 @@
 #'   )
 #' }
 #' @export
-write_new_distribution <- function(dist_name = NULL,
+greta_dist_write <- function(dist_name = NULL,
                                    dist_arg_list = NULL,
                                    overwrite = FALSE){
   
-  template_info <- greta_distribution_template(
+  template_info <- greta_dist_template(
     dist_name = dist_name,
     dist_arg_list = dist_arg_list
   ) 
@@ -51,7 +51,7 @@ write_new_distribution <- function(dist_name = NULL,
       "i" = "Make changes to file, {.file {dist_path}} in order to get \\
       distribution working in {.pkg greta}.",
       "i" = "See {.help create_new_distribution} for details",
-      "i" = "Add a test template for {.fun {dist_name}} with {.code write_distribution_test({.val {dist_name}})}"
+      "i" = "Add a test template for {.fun {dist_name}} with {.code greta_dist_write({.val {dist_name}})}"
       )
   )
   

@@ -6,8 +6,8 @@ build_greta_dist_definition <- function(dist_name, dist_arg_list){
   )
   
   top <- glue::glue(
-    '{dist_name} <- R6Class(
-         classname = "{dist_name}",
+    '{dist_name}_distribution <- R6::R6Class(
+         classname = "{dist_name}_distribution",
          inherit = distribution_node,
          public = list(
            {args}'
@@ -55,7 +55,9 @@ build_greta_dist_init <- function(dist_name,
   )
   
   glue::glue(
-    "initialize = function([param_list], \ndim) {
+    "
+    # you may need to add truncation here
+    initialize = function([param_list], \ndim) {
       
       [greta_array_coerce_assign]
       
@@ -187,7 +189,7 @@ build_greta_dist_r <- function(dist_name, dist_arg_list){
     "
 
 [dist_name] <- function([arg_list], dim = NULL) {
-  distrib([dist_name], [arg_list], dim)
+  distrib('[dist_name]_distribution', [arg_list], dim)
 }
   "
   ,
@@ -208,11 +210,11 @@ build_greta_dist_r <- function(dist_name, dist_arg_list){
 #' @export
 #'
 #' @examples
-#' greta_distribution_template(
+#' greta_dist_template(
 #'   dist_name = "lognormal", 
 #'   dist_arg_list = c("meanlog", "sdlog")
 #'   )
-greta_distribution_template <- function(dist_name, dist_arg_list){
+greta_dist_template <- function(dist_name, dist_arg_list){
   
   check_if_null(dist_name)
   check_if_null(dist_arg_list)

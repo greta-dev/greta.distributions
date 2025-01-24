@@ -3,16 +3,16 @@
 #' When you add a new distribution, you want to add a test to make sure it is
 #'   behaving as expected. This function generates a test template. It only 
 #'   creates the text, it does not write to file. See 
-#'   `write_distribution_test()` to write the test to file automatically.
+#'   `greta_dist_write()` to write the test to file automatically.
 #'
 #' @param dist_name character. A distribution name. E.g., "lognormal"
 #'
 #' @returns text containing test template code
 #'
 #' @examples
-#' gumbel <- greta_distribution_template_test("gumbel")
+#' gumbel <- greta_dist_template_test("gumbel")
 #' @export
-greta_distribution_template_test <- function(dist_name){
+greta_dist_template_test <- function(dist_name){
   template <- '
 test_that("[dist_name] distribution has correct density", {
   skip_if_not(check_tf_version())
@@ -62,7 +62,7 @@ test_that("[dist_name] distribution works with calculate", {
 #' 
 #' When you add a new distribution, you want to add a test to make sure it is
 #'   behaving as expected. This function generates a test template. See also 
-#'  `greta_distribution_template_test()` to see the text generated if you want 
+#'  `greta_dist_template_test()` to see the text generated if you want 
 #'  to save it somewhere else.
 #'
 #' @param dist_name character, name of distribution.
@@ -74,10 +74,10 @@ test_that("[dist_name] distribution works with calculate", {
 #'
 #' @examples
 #' \dontrun{
-#' write_distribution_test("gumbel")
+#' greta_dist_write("gumbel")
 #' }
-write_distribution_test <- function(dist_name, overwrite = FALSE){
-  template_test_info <- greta_distribution_template_test(dist_name)
+greta_dist_write_test <- function(dist_name, overwrite = FALSE){
+  template_test_info <- greta_dist_template_test(dist_name)
   
   dist_test_path <- make_test_path(dist_name)
   
@@ -96,7 +96,7 @@ write_distribution_test <- function(dist_name, overwrite = FALSE){
   
   cli::cli_inform(
     message = c(
-      "i" = "See {.help write_distribution_test} for details"
+      "i" = "See {.help greta_dist_write} for details"
     )
   )
   
