@@ -24,21 +24,23 @@ zero_inflated_negative_binomial_distribution <- R6::R6Class(
     initialize = function(size, prob, dim) {
       size <- as.greta_array(size)
       prob <- as.greta_array(prob)
-      
+
       # add the nodes as parents and parameters
       dim <- check_dims(size, prob, target_dim = dim)
       super$initialize("negative_binomial", dim, discrete = TRUE)
       self$add_parameter(size, "size")
       self$add_parameter(prob, "prob")
     },
-    
-    # nolint start
+
     tf_distrib = function(parameters, dag) {
-      tfp$distributions$NegativeBinomial(
+      tfp_nb <- tfp$distributions$NegativeBinomial(
         total_count = parameters$size,
         probs = fl(1) - parameters$prob
       )
+      tfp$distributions$Inflated(
+        tfp_nb,
+        inflated_loc_probs = parameters$pi
+      )
     }
-    # nolint end
   )
 )
