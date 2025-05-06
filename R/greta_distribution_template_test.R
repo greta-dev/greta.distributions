@@ -1,8 +1,8 @@
 #' Create a test template for a distribution
-#' 
+#'
 #' When you add a new distribution, you want to add a test to make sure it is
-#'   behaving as expected. This function generates a test template. It only 
-#'   creates the text, it does not write to file. See 
+#'   behaving as expected. This function generates a test template. It only
+#'   creates the text, it does not write to file. See
 #'   `write_distribution_test()` to write the test to file automatically.
 #'
 #' @param dist_name character. A distribution name. E.g., "lognormal"
@@ -12,7 +12,7 @@
 #' @examples
 #' gumbel <- greta_distribution_template_test("gumbel")
 #' @export
-greta_distribution_template_test <- function(dist_name){
+greta_distribution_template_test <- function(dist_name) {
   template <- '
 test_that("[dist_name] distribution has correct density", {
   skip_if_not(check_tf_version())
@@ -46,27 +46,27 @@ test_that("[dist_name] distribution works with calculate", {
     
 })  
   '
-  
-    templated_test <- glue::glue(
+
+  templated_test <- glue::glue(
     template,
     .open = "[",
     .close = "]"
-    )
+  )
   # test test file exists...
-  
+
   styler::style_text(templated_test)
 }
 
 
 #' Create a test template for a distribution
-#' 
+#'
 #' When you add a new distribution, you want to add a test to make sure it is
-#'   behaving as expected. This function generates a test template. See also 
-#'  `greta_distribution_template_test()` to see the text generated if you want 
+#'   behaving as expected. This function generates a test template. See also
+#'  `greta_distribution_template_test()` to see the text generated if you want
 #'  to save it somewhere else.
 #'
 #' @param dist_name character, name of distribution.
-#' @param overwrite logical. Default is FALSE. Whether to overwrite the test 
+#' @param overwrite logical. Default is FALSE. Whether to overwrite the test
 #'   file if it already exists.
 #'
 #' @returns test file written out to `tests/testthat/test-{dist_name}`.
@@ -76,28 +76,26 @@ test_that("[dist_name] distribution works with calculate", {
 #' \dontrun{
 #' write_distribution_test("gumbel")
 #' }
-write_distribution_test <- function(dist_name, overwrite = FALSE){
+write_distribution_test <- function(dist_name, overwrite = FALSE) {
   template_test_info <- greta_distribution_template_test(dist_name)
-  
+
   dist_test_path <- make_test_path(dist_name)
-  
+
   check_if_overwrite(dist_name, overwrite, dist_test_path)
-  
+
   cli::cli_inform(
     message = c(
       "i" = "Writing new test template for distribution, \\
       {.fun dist_name}, to {.file {dist_test_path}}."
     )
   )
-  
+
   file.create(dist_test_path)
-  writeLines(text = template_test_info,
-             con = dist_test_path)
-  
+  writeLines(text = template_test_info, con = dist_test_path)
+
   cli::cli_inform(
     message = c(
       "i" = "See {.help write_distribution_test} for details"
     )
   )
-  
 }

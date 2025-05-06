@@ -13,7 +13,7 @@
 #' mcmc(m)
 #' }
 #' @export
-zero_inflated_poisson <- function (lambda, pi, dim = NULL) {
+zero_inflated_poisson <- function(lambda, pi, dim = NULL) {
   distrib('zero_inflated_poisson', lambda, pi, dim)
 }
 
@@ -31,31 +31,33 @@ zero_inflated_poisson_distribution <- R6::R6Class(
       self$add_parameter(lambda, "lambda")
       self$add_parameter(pi, "pi")
     },
-    
+
     tf_distrib = function(parameters, dag) {
       lambda <- parameters$lambda
       pi_var <- parameters$pi
       log_prob <- function(x) {
         tf$math$log(
-          (pi_var * (fl(1) - tf$math$sign(tf$math$abs(x))) + 
-             tf$math$exp(
-               tf$math$log1p(-pi_var) - lambda + 
-                 x * tf$math$log(lambda) - tf$math$lgamma(x + fl(1)))
-          )
+          (pi_var *
+            (fl(1) - tf$math$sign(tf$math$abs(x))) +
+            tf$math$exp(
+              tf$math$log1p(-pi_var) -
+                lambda +
+                x * tf$math$log(lambda) -
+                tf$math$lgamma(x + fl(1))
+            ))
         )
       }
-      
+
       sample <- function(seed) {
         binom <- tfp$distributions$Binomial(total_count = 1, probs = pi)
         pois <- tfp$distributions$Poisson(rate = lambda)
-        
+
         zi <- binom$sample(seed = seed)
         lbd <- pois$sample(seed = seed)
-        
+
         (fl(1) - zi) * lbd
-        
       }
-      
+
       list(
         log_prob = log_prob,
         sample = sample,
@@ -63,7 +65,7 @@ zero_inflated_poisson_distribution <- R6::R6Class(
         log_cdf = NULL
       )
     },
-    
+
     tf_cdf_function = NULL,
     tf_log_cdf_function = NULL
   )

@@ -1,6 +1,6 @@
 #' @title Extends Distributions Available in the `greta` package
 #' @name greta.distributions
-#' 
+#'
 #' @description describe your package here, you can re-use the text from DESCRIPTION
 #' @keywords internal
 "_PACKAGE"
