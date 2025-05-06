@@ -20,7 +20,7 @@ to file, see \code{write_new_distribution()}.
 }
 \examples{
 greta_distribution_template(
-  dist_name = "lognormal", 
+  dist_name = "lognormal",
   dist_arg_list = c("meanlog", "sdlog")
   )
 }
