@@ -20,17 +20,22 @@ as_variable <- function(x) {
 
 # check a greta operation and the equivalent R operation give the same output
 # e.g. check_op(sum, randn(100, 3))
-check_op <- function(op, a, b, greta_op = NULL,
-                     other_args = list(),
-                     tolerance = 1e-3,
-                     only = c("data", "variable", "batched"),
-                     relative_error = FALSE) {
+check_op <- function(
+  op,
+  a,
+  b,
+  greta_op = NULL,
+  other_args = list(),
+  tolerance = 1e-3,
+  only = c("data", "variable", "batched"),
+  relative_error = FALSE
+) {
   if (is.null(greta_op)) {
     greta_op <- op
   }
-  
+
   r_out <- run_r_op(op, a, b, other_args)
-  
+
   for (type in only) {
     # compare with ops on data greta arrays
     greta_out <- run_greta_op(greta_op, a, b, other_args, type)
@@ -38,10 +43,15 @@ check_op <- function(op, a, b, greta_op = NULL,
   }
 }
 
-compare_op <- function(r_out, greta_out, tolerance = 1e-4, relative_error = FALSE) {
-  if (relative_error){
+compare_op <- function(
+  r_out,
+  greta_out,
+  tolerance = 1e-4,
+  relative_error = FALSE
+) {
+  if (relative_error) {
     difference <- as.vector(abs(r_out - greta_out) / abs(r_out))
-  } else if (!relative_error){
+  } else if (!relative_error) {
     difference <- as.vector(abs(r_out - greta_out))
   }
   difference_lt_tolerance <- difference < tolerance
@@ -59,30 +69,36 @@ run_r_op <- function(op, a, b, other_args) {
   do.call(op, arg_list)
 }
 
-run_greta_op <- function(greta_op, a, b, other_args,
-                         type = c("data", "variable", "batched")) {
+run_greta_op <- function(
+  greta_op,
+  a,
+  b,
+  other_args,
+  type = c("data", "variable", "batched")
+) {
   type <- match.arg(type)
-  
-  converter <- switch(type,
-                      data = as_data,
-                      variable = as_variable,
-                      batched = as_variable
+
+  converter <- switch(
+    type,
+    data = as_data,
+    variable = as_variable,
+    batched = as_variable
   )
-  
+
   g_a <- converter(a)
-  
+
   arg_list <- list(g_a)
   values <- list(g_a = a)
-  
+
   if (!missing(b)) {
     g_b <- converter(b)
     arg_list <- c(arg_list, list(g_b))
     values <- c(values, list(g_b = b))
   }
-  
+
   arg_list <- c(arg_list, other_args)
   out <- do.call(greta_op, arg_list)
-  
+
   if (type == "data") {
     # data greta arrays should provide their own values
     result <- calculate(out, values = list())[[1]]
@@ -93,7 +109,7 @@ run_greta_op <- function(greta_op, a, b, other_args,
   } else {
     result <- calculate(out, values = values)[[1]]
   }
-  
+
   result
 }
 
@@ -118,6 +134,7 @@ expect_ok <- function(expr) {
   testthat::expect_error(expr, NA)
 }
 
-is.greta_array <- function(x) { # nolint
+is.greta_array <- function(x) {
+  # nolint
   inherits(x, "greta_array")
 }

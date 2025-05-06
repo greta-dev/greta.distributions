@@ -1,59 +1,57 @@
-build_greta_dist_definition <- function(dist_name, dist_arg_list){
-  
+build_greta_dist_definition <- function(dist_name, dist_arg_list) {
   args <- glue::glue_collapse(
     x = glue::glue("{dist_arg_list} = NA,"),
     sep = "\n"
   )
-  
+
   top <- glue::glue(
     '{dist_name} <- R6Class(
          classname = "{dist_name}",
          inherit = distribution_node,
          public = list(
            {args}'
-    )
-  
-  top
+  )
 
+  top
 }
 
-build_greta_dist_init <- function(dist_name, 
-                                  dist_arg_list){
-  
+build_greta_dist_init <- function(dist_name, dist_arg_list) {
   param_list <- glue::glue_collapse(x = dist_arg_list, sep = ", ")
-  
+
   param_quoted_list <- glue::glue_collapse(
     x = glue::glue("'{dist_arg_list}'"),
     sep = ", "
-    )
-  
+  )
+
   greta_array_coerce <- glue::glue_collapse(
     x = glue::glue(
       "{dist_arg_list} <- as.greta_array({dist_arg_list})"
     ),
     sep = "\n"
   )
-  
+
   greta_self_assign <- glue::glue_collapse(
     x = glue::glue(
       "self${dist_arg_list} <- {dist_arg_list}"
-      ),
+    ),
     sep = "\n"
   )
-  
+
   greta_array_coerce_assign <- glue::glue_collapse(
-    glue::glue("{greta_array_coerce}
-                {greta_self_assign}"),
+    glue::glue(
+      "{greta_array_coerce}
+                {greta_self_assign}"
+    ),
     sep = "\n"
   )
-  
+
   greta_self_add <- glue::glue_collapse(
     x = glue::glue(
       "self$add_parameter({dist_arg_list}, '{dist_arg_list}')"
     ),
     sep = "\n"
   )
-  
+
   glue::glue(
     "initialize = function([param_list], \ndim) {
       
@@ -74,43 +72,38 @@ build_greta_dist_init <- function(dist_name,
 }
 
 
-
-  
-build_greta_dist_tf_distrib <- function(dist_name, dist_arg_list){
-  
+build_greta_dist_tf_distrib <- function(dist_name, dist_arg_list) {
   arg_param_assign <- glue::glue_collapse(
     glue::glue(
       "{dist_arg_list} <- parameters${dist_arg_list}"
     ),
     sep = "\n"
   )
-  
+
   arg_tf_assign <- glue::glue_collapse(
     glue::glue(
       "tf_{dist_arg_list} <- fl(self${dist_arg_list})"
     ),
     sep = "\n"
   )
-  
+
   glue::glue(
-  'tf_distrib = function(parameters, dag) {
+    'tf_distrib = function(parameters, dag) {
       
       [arg_param_assign]
       
-      [arg_tf_assign]'
-  ,
-  .open = "[",
-  .close = "]"
+      [arg_tf_assign]',
+    .open = "[",
+    .close = "]"
   )
 }
 
-build_greta_dist_log_prob <- function(dist_name, dist_arg_list){
-  
+build_greta_dist_log_prob <- function(dist_name, dist_arg_list) {
   param_list <- glue::glue_collapse(
     x = glue::glue("{dist_arg_list} = {dist_arg_list}"),
     sep = ",\n"
   )
-  
+
   glue::glue(
     "
     log_prob <- function(x) {
@@ -129,24 +122,21 @@ build_greta_dist_log_prob <- function(dist_name, dist_arg_list){
     }
   
   ",
-  .open = "[",
-  .close = "]"
+    .open = "[",
+    .close = "]"
   )
-  
 }
 
-build_greta_dist_sample <- function(dist_name, dist_arg_list){
-  
+build_greta_dist_sample <- function(dist_name, dist_arg_list) {
   arg_list <- glue::glue_collapse(
     glue::glue(
       "{dist_arg_list} = {dist_arg_list}"
     ),
     sep = ", \n"
   )
-  
-  
+
   glue::glue(
-  "
+    "
   
   sample <- function(seed) {
     
@@ -173,31 +163,28 @@ build_greta_dist_sample <- function(dist_name, dist_arg_list){
   }
   ) 
     )
-  "
-  ,
-  .open = "[",
-  .close = "]"
+  ",
+    .open = "[",
+    .close = "]"
   )
-    
 }
-build_greta_dist_r <- function(dist_name, dist_arg_list){
+build_greta_dist_r <- function(dist_name, dist_arg_list) {
   arg_list <- glue::glue_collapse(dist_arg_list, sep = ", ")
-  
+
   glue::glue(
     "
 
 [dist_name] <- function([arg_list], dim = NULL) {
   distrib([dist_name], [arg_list], dim)
 }
-  "
-  ,
-  .open = "[",
-  .close = "]"
+  ",
+    .open = "[",
+    .close = "]"
   )
 }
 
 #' Create a template greta distribution
-#' 
+#'
 #' This code creates the text of a basic greta distribution. To write the text
 #'   to file, see `write_new_distribution()`.
 #'
@@ -209,26 +196,24 @@ build_greta_dist_r <- function(dist_name, dist_arg_list){
 #'
 #' @examples
 #' greta_distribution_template(
-#'   dist_name = "lognormal", 
+#'   dist_name = "lognormal",
 #'   dist_arg_list = c("meanlog", "sdlog")
 #'   )
-greta_distribution_template <- function(dist_name, dist_arg_list){
-  
+greta_distribution_template <- function(dist_name, dist_arg_list) {
   check_if_null(dist_name)
   check_if_null(dist_arg_list)
-  
+
   # TODO
   # Add defensive code testing for distribution name and argument list
   # e.g., check distribution doesn't already exist, check valid text inputs
-  
-  
+
   build_definition <- build_greta_dist_definition(dist_name, dist_arg_list)
   build_initialize <- build_greta_dist_init(dist_name, dist_arg_list)
   build_tf_distrib <- build_greta_dist_tf_distrib(dist_name, dist_arg_list)
   build_log_prob <- build_greta_dist_log_prob(dist_name, dist_arg_list)
   build_sample <- build_greta_dist_sample(dist_name, dist_arg_list)
   build_r_func <- build_greta_dist_r(dist_name, dist_arg_list)
-  
+
   distribution_txt <- glue::glue(
     "{build_definition}",
     "\n{build_initialize}",
@@ -237,7 +222,6 @@ greta_distribution_template <- function(dist_name, dist_arg_list){
     "{build_sample}",
     "\n{build_r_func}"
   )
-  
+
   styler::style_text(distribution_txt)
-  
 }

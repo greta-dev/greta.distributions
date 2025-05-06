@@ -30,7 +30,7 @@ the R code as plain text, and you can then save somewhere else as you wish.
 \examples{
 \dontrun{
 write_new_distribution(
-  dist_name = "lognormal", 
+  dist_name = "lognormal",
   dist_arg_list = c("meanlog", "sdlog")
   )
 }
